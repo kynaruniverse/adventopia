@@ -16,6 +16,8 @@ const gameState = {
   collectedKeyPieces: [],
   achievements: [],
   hintIndex: {},
+  puzzleAttempts: {},
+  activePuzzle: null,
   audioEnabled: true,
   gameStarted: false,
   navArrows: []
@@ -422,7 +424,7 @@ elements.dialogueClose.addEventListener('click', () => {
 
 function triggerPuzzle(puzzleId) {
   if (gameState.solvedPuzzles.includes(puzzleId)) {
-    showDialogue("You've already solved this one — great work!");
+    showDialogue("You have already solved this one — great work!");
     return;
   }
 
@@ -432,6 +434,10 @@ function triggerPuzzle(puzzleId) {
       return res.json();
     })
     .then(puzzleData => {
+      gameState.activePuzzle = puzzleData;
+      if (!gameState.puzzleAttempts[puzzleId]) {
+        gameState.puzzleAttempts[puzzleId] = 0;
+      }
       renderPuzzle(puzzleData);
     })
     .catch(err => {
@@ -441,24 +447,32 @@ function triggerPuzzle(puzzleId) {
 }
 
 function renderPuzzle(puzzleData) {
-  elements.puzzleContainer.innerHTML = `
-    <h2 style="color:#2C5F8A; margin-bottom:12px;">
-      ${puzzleData.name}
-    </h2>
-    <p style="color:#555; margin-bottom:20px; line-height:1.5;">
-      ${puzzleData.description}
-    </p>
-    <p style="color:#888; font-size:0.9rem;">
-      Puzzle interface coming in Phase 4...
-    </p>
-    <button onclick="closePuzzle()"
-      style="margin-top:20px; background:#2C5F8A; color:white;
-             border:none; border-radius:20px; padding:8px 24px;
-             font-size:0.95rem; cursor:pointer;">
-      Close
-    </button>
-  `;
+  elements.puzzleContainer.innerHTML = '';
   show(elements.puzzleOverlay);
+
+  // Route to correct puzzle type
+  if (puzzleData.type === 'matching_sort') {
+    renderBreadSortPuzzle(puzzleData);
+  } else if (puzzleData.type === 'sequencing') {
+    renderStoryPagesPuzzle(puzzleData);
+  } else if (puzzleData.type === 'pattern_recognition') {
+    renderGatePatternPuzzle(puzzleData);
+  } else {
+    elements.puzzleContainer.innerHTML = `
+      <h2 style="color:#2C5F8A; margin-bottom:12px;">
+        ${puzzleData.name}
+      </h2>
+      <p style="color:#555; margin-bottom:20px;">
+        ${puzzleData.description}
+      </p>
+      <button onclick="closePuzzle()"
+        style="margin-top:20px; background:#2C5F8A; color:white;
+               border:none; border-radius:20px; padding:8px 24px;
+               cursor:pointer;">
+        Close
+      </button>
+    `;
+  }
 }
 
 function closePuzzle() {
@@ -468,9 +482,38 @@ function closePuzzle() {
 
 function puzzleSolved(puzzleId, reward) {
   gameState.solvedPuzzles.push(puzzleId);
+  gameState.puzzleAttempts[puzzleId] = 0;
+  gameState.activePuzzle = null;
   saveProgress();
   hide(elements.puzzleOverlay);
+  elements.puzzleContainer.innerHTML = '';
   showReward(reward);
+}
+
+function puzzleFailed(puzzleId, failureMessage) {
+  if (!gameState.puzzleAttempts[puzzleId]) {
+    gameState.puzzleAttempts[puzzleId] = 0;
+  }
+  gameState.puzzleAttempts[puzzleId]++;
+
+  // Show failure message
+  const failMsg = document.getElementById('puzzle-fail-msg');
+  if (failMsg) {
+    failMsg.textContent = failureMessage || 'Not quite — give it another go!';
+    failMsg.style.display = 'block';
+    setTimeout(() => { failMsg.style.display = 'none'; }, 2500);
+  }
+
+  // Auto show hint after 2 failed attempts
+  if (
+    gameState.puzzleAttempts[puzzleId] >= 2 &&
+    gameState.activePuzzle &&
+    gameState.activePuzzle.hints
+  ) {
+    setTimeout(() => {
+      showHint(puzzleId, gameState.activePuzzle.hints);
+    }, 800);
+  }
 }
 
 
