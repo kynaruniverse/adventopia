@@ -839,6 +839,13 @@ function checkGatePattern(puzzleId, correctAnswer) {
       gameState.solvedPuzzles.push(puzzleId + '_pattern');
     }
 
+    // Award key piece 3 if not already collected
+    if (!gameState.collectedKeyPieces.includes('key_piece_3')) {
+      gameState.collectedKeyPieces.push('key_piece_3');
+      saveProgress();
+      updateInventoryDisplay();
+    }
+
     // Show success then move to key piece stage
     selected.style.background  = '#E8F5E9';
     selected.style.borderColor = '#4CAF50';

@@ -423,7 +423,9 @@ elements.dialogueClose.addEventListener('click', () => {
 // -----------------------------------------------
 
 function triggerPuzzle(puzzleId) {
-  if (gameState.solvedPuzzles.includes(puzzleId)) {
+  // Puzzle 3 can always be re-opened to insert key pieces
+  const isGatePattern = puzzleId === 'puzzle3_gate_pattern';
+  if (gameState.solvedPuzzles.includes(puzzleId) && !isGatePattern) {
     showDialogue("You have already solved this one — great work!");
     return;
   }
