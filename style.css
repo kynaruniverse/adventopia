@@ -1,0 +1,361 @@
+/* =============================================
+   ADVENTOPIA — Main Stylesheet
+   ============================================= */
+
+/* --- RESET & BASE --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background-color: #1a1a2e;
+}
+
+/* --- LOADING SCREEN --- */
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #2C5F8A, #3A7DC9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  color: white;
+  text-align: center;
+}
+
+#loading-screen h1 {
+  font-size: 3rem;
+  font-weight: bold;
+  letter-spacing: 4px;
+  margin-bottom: 16px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+#loading-screen p {
+  font-size: 1.1rem;
+  opacity: 0.85;
+}
+
+/* --- UTILITY --- */
+.hidden {
+  display: none !important;
+}
+
+/* --- GAME CONTAINER --- */
+#game-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #1a1a2e;
+}
+
+/* --- HUD --- */
+#hud {
+  width: 100%;
+  height: 60px;
+  background-color: #2C5F8A;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 100;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+#inventory-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.inventory-slot {
+  width: 44px;
+  height: 44px;
+  background-color: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+#hud-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+#hud-buttons button {
+  background-color: rgba(255,255,255,0.2);
+  color: white;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#hud-buttons button:hover,
+#hud-buttons button:active {
+  background-color: rgba(255,255,255,0.35);
+}
+
+/* --- SCENE AREA --- */
+#scene-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#game-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* --- DIALOGUE BOX --- */
+#dialogue-box {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 600px;
+  background-color: white;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 200;
+  text-align: center;
+}
+
+#dialogue-text {
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+#dialogue-close {
+  background-color: #2C5F8A;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 28px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#dialogue-close:hover,
+#dialogue-close:active {
+  background-color: #3A7DC9;
+}
+
+/* --- PUZZLE OVERLAY --- */
+#puzzle-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+}
+
+#puzzle-container {
+  background-color: white;
+  border-radius: 20px;
+  padding: 28px;
+  width: 90%;
+  max-width: 560px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  text-align: center;
+}
+
+/* --- HINT OVERLAY --- */
+#hint-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 400;
+}
+
+#hint-box {
+  background: linear-gradient(135deg, #fffbe6, #fff8d0);
+  border: 3px solid #f5c842;
+  border-radius: 20px;
+  padding: 28px;
+  width: 85%;
+  max-width: 460px;
+  text-align: center;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+}
+
+#hint-text {
+  font-size: 1rem;
+  color: #444;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+#hint-close {
+  background-color: #f5c842;
+  color: #333;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 28px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+#hint-close:hover,
+#hint-close:active {
+  background-color: #e0b030;
+}
+
+/* --- REWARD OVERLAY --- */
+#reward-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 400;
+}
+
+#reward-box {
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  border: 3px solid #4CAF50;
+  border-radius: 20px;
+  padding: 32px;
+  width: 85%;
+  max-width: 460px;
+  text-align: center;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+}
+
+#reward-text {
+  font-size: 1.1rem;
+  color: #2e7d32;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  font-weight: bold;
+}
+
+#reward-close {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 28px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+#reward-close:hover,
+#reward-close:active {
+  background-color: #388e3c;
+}
+
+/* --- ERROR SCREEN --- */
+#error-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #1a1a2e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  color: white;
+  text-align: center;
+  padding: 24px;
+}
+
+#error-screen h2 {
+  font-size: 2rem;
+  margin-bottom: 12px;
+  color: #ff6b6b;
+}
+
+#error-screen p {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin-bottom: 24px;
+  max-width: 360px;
+  line-height: 1.6;
+}
+
+#error-screen button {
+  background-color: #3A7DC9;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 32px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 480px) {
+  #loading-screen h1 {
+    font-size: 2.2rem;
+  }
+
+  #hud {
+    height: 52px;
+    padding: 0 10px;
+  }
+
+  .inventory-slot {
+    width: 38px;
+    height: 38px;
+  }
+
+  #puzzle-container {
+    padding: 20px 16px;
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "id": "puzzle1_bread_sort",
+  "name": "The Bread Sort",
+  "type": "matching_sort",
+  "description": "Benny has mixed up his bread deliveries! Drag each bread item into the basket with the matching shape.",
+  "learningFocus": "Matching, visual recognition, sorting by category",
+  "baskets": [
+    { "id": "basket_circle", "label": "Circle Basket", "symbol": "circle", "color": "#EF9A9A" },
+    { "id": "basket_square", "label": "Square Basket", "symbol": "square", "color": "#90CAF9" },
+    { "id": "basket_triangle", "label": "Triangle Basket", "symbol": "triangle", "color": "#A5D6A7" }
+  ],
+  "items": [
+    { "id": "bread_1", "label": "Round Roll", "symbol": "circle" },
+    { "id": "bread_2", "label": "Square Loaf", "symbol": "square" },
+    { "id": "bread_3", "label": "Triangle Slice", "symbol": "triangle" },
+    { "id": "bread_4", "label": "Round Bun", "symbol": "circle" },
+    { "id": "bread_5", "label": "Square Biscuit", "symbol": "square" },
+    { "id": "bread_6", "label": "Triangle Roll", "symbol": "triangle" }
+  ],
+  "hints": [
+    "Look carefully at the shape on each piece of bread — can you find a basket with the same shape?",
+    "Try starting with just one bread. Find its matching shape on one of the baskets.",
+    "The circle basket is on the left. Does any bread have a circle on it?"
+  ],
+  "failureMessage": "Hmm, not quite — but don't worry, give it another go!",
+  "reward": {
+    "text": "Brilliant! You sorted all the bread! Benny is so pleased. Here is your first golden key piece!",
+    "badge": "Super Sorter",
+    "keyPiece": "key_piece_1"
+  }
+}

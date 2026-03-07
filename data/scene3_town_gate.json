@@ -1,0 +1,55 @@
+{
+  "id": "scene3_town_gate",
+  "name": "The Town Gate",
+  "backgroundColor": "#FFE0B2",
+  "music": "audio/music_gate.mp3",
+  "unlockRequirement": {
+    "type": "keyPiece",
+    "id": "key_piece_2"
+  },
+  "entryDialogue": "We are almost there, Pip! This is the Town Gate. Help Gus and use your key pieces to unlock the way forward!",
+  "objects": [
+    {
+      "id": "gus_gatekeeper",
+      "label": "Gus the Gatekeeper",
+      "x": 15,
+      "y": 25,
+      "w": 18,
+      "h": 32,
+      "color": "#455A64",
+      "dialogue": "Ah, hello there! I am Gus. I look after this gate, but I have gone and forgotten the pattern to open it. And I see you have been collecting key pieces — you will need those too! Can you crack the pattern for me?",
+      "puzzle": "puzzle3_gate_pattern"
+    },
+    {
+      "id": "gate_panel",
+      "label": "Gate Panel",
+      "x": 40,
+      "y": 20,
+      "w": 22,
+      "h": 40,
+      "color": "#FFD700",
+      "dialogue": "The gate panel glows softly. Three key slots wait to be filled, and a pattern lock sits above them.",
+      "puzzle": "puzzle3_gate_pattern"
+    },
+    {
+      "id": "signpost",
+      "label": "Signpost",
+      "x": 72,
+      "y": 35,
+      "w": 14,
+      "h": 30,
+      "color": "#8D6E63",
+      "dialogue": "The signpost points into the mist beyond the gate. You can just make out the words: More worlds await..."
+    },
+    {
+      "id": "ivy_walls",
+      "label": "Ivy",
+      "x": 2,
+      "y": 5,
+      "w": 10,
+      "h": 50,
+      "color": "#388E3C",
+      "dialogue": "The ivy rustles in a gentle breeze. A small sparkle dances between the leaves."
+    }
+  ]
+}

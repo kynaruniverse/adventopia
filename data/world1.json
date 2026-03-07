@@ -1,0 +1,20 @@
+{
+  "id": "world1",
+  "name": "The Learning Village",
+  "theme": "cozy, welcoming, introductory",
+  "scenes": [
+    "scene1_village_square",
+    "scene2_library",
+    "scene3_town_gate"
+  ],
+  "startScene": "scene1_village_square",
+  "completionCondition": {
+    "type": "keyPieces",
+    "required": 3
+  },
+  "completionReward": {
+    "badge": "Village Hero",
+    "text": "You completed The Learning Village! You are a true Adventopia hero, Pip!",
+    "unlocksWorld": "world2"
+  }
+}

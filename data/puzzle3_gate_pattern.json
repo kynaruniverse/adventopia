@@ -1,0 +1,26 @@
+{
+  "id": "puzzle3_gate_pattern",
+  "name": "The Gate Pattern",
+  "type": "pattern_recognition",
+  "description": "The gate has a pattern lock! Look at the sequence of shapes and choose the correct one to complete the pattern.",
+  "learningFocus": "Pattern recognition, completing sequences, logical deduction",
+  "pattern": {
+    "sequence": ["star", "circle", "star", "circle"],
+    "blankPosition": 5,
+    "answer": "star",
+    "options": ["star", "circle", "triangle"]
+  },
+  "keyPiecesRequired": 3,
+  "hints": [
+    "Look at the shapes in the row — do you notice anything repeating?",
+    "Try covering the last shape and just look at the ones before it. What comes next in the pattern?",
+    "The pattern goes: shape, shape, shape, shape... which of the three choices fits that rhythm?"
+  ],
+  "failureMessage": "Hmm, not quite that one — have another look at the pattern, you will get it!",
+  "reward": {
+    "text": "That is it! Now insert your three golden key pieces to open the gate. Adventure awaits beyond!",
+    "badge": "Village Hero",
+    "worldComplete": true,
+    "worldCompleteMessage": "You did it, Pip! The gate swings open! The Learning Village cheers for you. A whole world of adventure lies ahead!"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "id": "puzzle2_story_pages",
+  "name": "The Story Pages",
+  "type": "sequencing",
+  "description": "The pages of Mara's storybook are all mixed up! Put them in the right order by dragging them into the numbered slots.",
+  "learningFocus": "Sequencing, reading comprehension, logical ordering",
+  "pages": [
+    {
+      "id": "page_1",
+      "correctPosition": 1,
+      "illustration": "A character waking up in bed with sunshine through the window",
+      "text": "One bright morning, Pip woke up ready for a new adventure."
+    },
+    {
+      "id": "page_2",
+      "correctPosition": 2,
+      "illustration": "A character leaving a cosy home, backpack on, waving goodbye",
+      "text": "Pip packed a bag and set off down the winding path."
+    },
+    {
+      "id": "page_3",
+      "correctPosition": 3,
+      "illustration": "A character arriving at a village with a fountain and bunting",
+      "text": "After a long walk, Pip arrived at the cheerful Learning Village."
+    },
+    {
+      "id": "page_4",
+      "correctPosition": 4,
+      "illustration": "Two characters meeting and shaking hands, both smiling",
+      "text": "There, Pip met a new friend who needed help."
+    },
+    {
+      "id": "page_5",
+      "correctPosition": 5,
+      "illustration": "Characters celebrating with stars and confetti around them",
+      "text": "Together they solved every puzzle and celebrated their adventure!"
+    }
+  ],
+  "hints": [
+    "Read each page carefully — what do you think happens first in the story?",
+    "The first page shows someone waking up in the morning. Can you find that one?",
+    "Think about what happens in a story — beginning, middle, and end. Which pages feel like a beginning?"
+  ],
+  "failureMessage": "Nearly there — think about what would happen first. Take your time, there is no rush.",
+  "reward": {
+    "text": "You put the story back together perfectly! Mara is so grateful. Here is your second golden key piece!",
+    "badge": "Story Keeper",
+    "keyPiece": "key_piece_2"
+  }
+}

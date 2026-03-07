@@ -1,13 +1,93 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2C5F8A" />
+  <meta name="description" content="Adventopia — Explore, Learn, Play" />
+  
+  <title>Adventopia</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+  
+  <!-- LOADING SCREEN -->
+  <div id="loading-screen">
+    <h1>Adventopia</h1>
+    <p>Loading your adventure...</p>
+  </div>
+  
+  <!-- GAME CONTAINER -->
+  <div id="game-container" class="hidden">
+    
+    <!-- HUD — top bar with inventory and buttons -->
+    <div id="hud">
+      <div id="inventory-bar"></div>
+      <div id="hud-buttons">
+        <button id="hint-btn">💡 Hint</button>
+        <button id="audio-btn">🔊 Audio</button>
+      </div>
+    </div>
+    
+    <!-- SCENE AREA — where backgrounds and objects appear -->
+    <div id="scene-area">
+      <canvas id="game-canvas"></canvas>
+    </div>
+    
+    <!-- DIALOGUE BOX — for NPC speech and story text -->
+    <div id="dialogue-box" class="hidden">
+      <p id="dialogue-text"></p>
+      <button id="dialogue-close">OK</button>
+    </div>
+    
+    <!-- PUZZLE OVERLAY — puzzle interface appears here -->
+    <div id="puzzle-overlay" class="hidden">
+      <div id="puzzle-container"></div>
+    </div>
+    
+    <!-- HINT OVERLAY — Lumie appears here -->
+    <div id="hint-overlay" class="hidden">
+      <div id="hint-box">
+        <p id="hint-text"></p>
+        <button id="hint-close">Got it!</button>
+      </div>
+    </div>
+    
+    <!-- REWARD OVERLAY — badges and key pieces appear here -->
+    <div id="reward-overlay" class="hidden">
+      <div id="reward-box">
+        <p id="reward-text"></p>
+        <button id="reward-close">Brilliant!</button>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- ERROR SCREEN -->
+  <div id="error-screen" class="hidden">
+    <h2>Oops!</h2>
+    <p>Something didn't load correctly. Please restart the game.</p>
+    <button onclick="location.reload()">Try Again</button>
+  </div>
+  
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registered'))
+        .catch((err) => console.log('Service Worker error:', err));
+    }
+  </script>
+  
+  <!-- Main Game Script -->
+  <script src="main.js"></script>
   
 </body>
 

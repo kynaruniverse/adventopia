@@ -1,0 +1,54 @@
+{
+  "id": "scene2_library",
+  "name": "The Library",
+  "backgroundColor": "#D7CCC8",
+  "music": "audio/music_library.mp3",
+  "unlockRequirement": {
+    "type": "keyPiece",
+    "id": "key_piece_1"
+  },
+  "entryDialogue": "This is the village library. Mara the Librarian needs your help — it looks like something has made a mess in here!",
+  "objects": [
+    {
+      "id": "mara_librarian",
+      "label": "Mara the Librarian",
+      "x": 55,
+      "y": 25,
+      "w": 18,
+      "h": 32,
+      "color": "#7B1FA2",
+      "dialogue": "Oh dear, oh dear. The pages of our most treasured storybook have gone everywhere! Could you collect them all and put them back in the right order for me?",
+      "puzzle": "puzzle2_story_pages"
+    },
+    {
+      "id": "bookshelves",
+      "label": "Bookshelves",
+      "x": 5,
+      "y": 10,
+      "w": 20,
+      "h": 55,
+      "color": "#5D4037",
+      "dialogue": "Rows and rows of colourful books line the shelves. One glows with a golden shimmer!"
+    },
+    {
+      "id": "wall_map",
+      "label": "Wall Map",
+      "x": 70,
+      "y": 10,
+      "w": 22,
+      "h": 28,
+      "color": "#FFF9C4",
+      "dialogue": "A map of the whole Learning Village! You can see the Village Square, the Library, and the Town Gate marked with a glowing star."
+    },
+    {
+      "id": "spiral_staircase",
+      "label": "Staircase",
+      "x": 80,
+      "y": 50,
+      "w": 14,
+      "h": 35,
+      "color": "#BCAAA4",
+      "dialogue": "Shell peeks up the spiral staircase curiously, then scurries back to Pip."
+    }
+  ]
+}

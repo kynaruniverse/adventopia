@@ -1,0 +1,51 @@
+{
+  "id": "scene1_village_square",
+  "name": "Village Square",
+  "backgroundColor": "#87CEEB",
+  "music": "audio/music_village.mp3",
+  "unlockRequirement": null,
+  "entryDialogue": "Welcome to the Learning Village, Pip! The villagers need your help. Speak to Benny the Baker — he looks a little flustered!",
+  "objects": [
+    {
+      "id": "benny_baker",
+      "label": "Benny the Baker",
+      "x": 60,
+      "y": 30,
+      "w": 18,
+      "h": 30,
+      "color": "#FF9800",
+      "dialogue": "Oh thank goodness you're here! I've gone and mixed up all my bread deliveries! Can you help me sort them into the right baskets?",
+      "puzzle": "puzzle1_bread_sort"
+    },
+    {
+      "id": "fountain",
+      "label": "Fountain",
+      "x": 40,
+      "y": 50,
+      "w": 14,
+      "h": 20,
+      "color": "#64B5F6",
+      "dialogue": "The fountain bubbles away cheerfully. Shell splashes a paw in the water!"
+    },
+    {
+      "id": "notice_board",
+      "label": "Notice Board",
+      "x": 10,
+      "y": 35,
+      "w": 14,
+      "h": 22,
+      "color": "#8D6E63",
+      "dialogue": "Welcome to Adventopia, Pip! Help the villagers, collect the 3 golden key pieces, and unlock the Town Gate to begin your adventure!"
+    },
+    {
+      "id": "bench",
+      "label": "Bench",
+      "x": 75,
+      "y": 65,
+      "w": 16,
+      "h": 12,
+      "color": "#A1887F",
+      "dialogue": "Pip sits down for a moment. Shell climbs up and settles beside them."
+    }
+  ]
+}
