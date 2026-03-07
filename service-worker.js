@@ -4,7 +4,7 @@
    ============================================= */
 
 
-const CACHE_NAME = 'adventopia-v2';
+const CACHE_NAME = 'adventopia-v3';
 
 // Files to cache for offline play
 const CORE_FILES = [
