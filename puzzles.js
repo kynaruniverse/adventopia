@@ -211,10 +211,19 @@ function handleTouchEnd(e) {
 
   if (basket) {
     const contents = basket.querySelector('.basket-contents');
+
+    // Preserve all data attributes when moving element
+    const symbol = touchDragEl.getAttribute('data-symbol');
+    const id     = touchDragEl.getAttribute('data-id');
+
     touchDragEl.style.cursor   = 'default';
     touchDragEl.style.fontSize = '0.75rem';
     touchDragEl.draggable      = false;
+
+    // Re-set attributes explicitly after move
     contents.appendChild(touchDragEl);
+    touchDragEl.setAttribute('data-symbol', symbol);
+    touchDragEl.setAttribute('data-id', id);
   }
 
   touchClone.remove();
@@ -225,30 +234,39 @@ function handleTouchEnd(e) {
 
 // Check the bread sort answer
 function checkBreadSort(puzzleId, puzzleData) {
-  const baskets = document.querySelectorAll('.basket-zone');
-  let allCorrect = true;
+  const baskets   = document.querySelectorAll('.basket-zone');
+  let allCorrect  = true;
+  let totalPlaced = 0;
 
   baskets.forEach(basket => {
     const basketSymbol = basket.dataset.symbol;
     const items = basket.querySelectorAll('.bread-item');
 
     items.forEach(item => {
-      if (item.dataset.symbol !== basketSymbol) {
+      totalPlaced++;
+      // Read symbol from data attribute
+      const itemSymbol = item.getAttribute('data-symbol');
+
+      if (itemSymbol !== basketSymbol) {
         allCorrect = false;
-        // Highlight wrong items in red
         item.style.border = '2px solid #e53935';
       } else {
-        // Highlight correct items in green
         item.style.border = '2px solid #4CAF50';
       }
     });
-
-    // Check if any items are still in the original area
-    const remaining = document.querySelectorAll(
-      '#bread-items .bread-item'
-    );
-    if (remaining.length > 0) allCorrect = false;
   });
+
+  // Must have placed all 6 items
+  if (totalPlaced < puzzleData.items.length) {
+    allCorrect = false;
+    const failMsg = document.getElementById('puzzle-fail-msg');
+    if (failMsg) {
+      failMsg.textContent = 'Place all the bread into baskets first!';
+      failMsg.style.display = 'block';
+      setTimeout(() => { failMsg.style.display = 'none'; }, 2500);
+    }
+    return;
+  }
 
   if (allCorrect) {
     setTimeout(() => {
