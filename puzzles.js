@@ -83,8 +83,7 @@ function renderBreadSortPuzzle(puzzleData) {
     <!-- Buttons -->
     <div style="display:flex; gap:10px;
                 justify-content:center; flex-wrap:wrap;">
-      <button onclick="checkBreadSort('${puzzleData.id}',
-                        ${JSON.stringify(puzzleData).replace(/'/g, "\\'")})"
+      <button onclick="checkBreadSort('${puzzleData.id}')"
         style="background:#4CAF50; color:white; border:none;
                border-radius:20px; padding:10px 28px;
                font-size:1rem; cursor:pointer; font-weight:bold;">
@@ -233,20 +232,21 @@ function handleTouchEnd(e) {
 
 
 // Check the bread sort answer
-function checkBreadSort(puzzleId, puzzleData) {
-  const baskets   = document.querySelectorAll('.basket-zone');
-  let allCorrect  = true;
-  let totalPlaced = 0;
+function checkBreadSort(puzzleId) {
+  const puzzleData = gameState.activePuzzle;
+  if (!puzzleData) return;
+
+  const baskets    = document.querySelectorAll('.basket-zone');
+  let allCorrect   = true;
+  let totalPlaced  = 0;
 
   baskets.forEach(basket => {
-    const basketSymbol = basket.dataset.symbol;
+    const basketSymbol = basket.getAttribute('data-symbol');
     const items = basket.querySelectorAll('.bread-item');
 
     items.forEach(item => {
       totalPlaced++;
-      // Read symbol from data attribute
       const itemSymbol = item.getAttribute('data-symbol');
-
       if (itemSymbol !== basketSymbol) {
         allCorrect = false;
         item.style.border = '2px solid #e53935';
@@ -256,9 +256,7 @@ function checkBreadSort(puzzleId, puzzleData) {
     });
   });
 
-  // Must have placed all 6 items
   if (totalPlaced < puzzleData.items.length) {
-    allCorrect = false;
     const failMsg = document.getElementById('puzzle-fail-msg');
     if (failMsg) {
       failMsg.textContent = 'Place all the bread into baskets first!';
@@ -269,9 +267,7 @@ function checkBreadSort(puzzleId, puzzleData) {
   }
 
   if (allCorrect) {
-    setTimeout(() => {
-      puzzleSolved(puzzleId, puzzleData.reward);
-    }, 600);
+    setTimeout(() => puzzleSolved(puzzleId, puzzleData.reward), 600);
   } else {
     puzzleFailed(puzzleId, puzzleData.failureMessage);
   }
@@ -373,8 +369,7 @@ function renderStoryPagesPuzzle(puzzleData) {
     <!-- Buttons -->
     <div style="display:flex; gap:10px;
                 justify-content:center; flex-wrap:wrap;">
-      <button onclick="checkStoryPages('${puzzleData.id}',
-                        ${JSON.stringify(puzzleData).replace(/'/g, "\\'")})"
+      <button onclick="checkStoryPages('${puzzleData.id}')"
         style="background:#4CAF50; color:white; border:none;
                border-radius:20px; padding:10px 28px;
                font-size:1rem; cursor:pointer; font-weight:bold;">
@@ -556,7 +551,9 @@ function handlePageTouchEnd(e) {
 
 
 // Check the story pages answer
-function checkStoryPages(puzzleId, puzzleData) {
+function checkStoryPages(puzzleId) {
+  const puzzleData = gameState.activePuzzle;
+  if (!puzzleData) return;
   const slots = document.querySelectorAll('.page-slot');
   let allFilled  = true;
   let allCorrect = true;
@@ -704,10 +701,7 @@ function renderGatePatternPuzzle(puzzleData) {
       </div>
 
       <!-- Check pattern button -->
-      <button onclick="checkGatePattern(
-                  '${puzzleData.id}',
-                  '${pattern.answer}',
-                  ${JSON.stringify(puzzleData).replace(/'/g, "\\'")})"
+      <button onclick="checkGatePattern('${puzzleData.id}', '${pattern.answer}')"
         style="background:#4CAF50; color:white; border:none;
                border-radius:20px; padding:10px 28px;
                font-size:1rem; cursor:pointer;
@@ -760,8 +754,7 @@ function renderGatePatternPuzzle(puzzleData) {
       </div>
 
       ${gameState.collectedKeyPieces.length >= 3 ? `
-        <button onclick="completeWorld1(
-                  ${JSON.stringify(puzzleData).replace(/'/g, "\\'")})"
+        <button onclick="completeWorld1()"
           style="background:#FF9800; color:white; border:none;
                  border-radius:20px; padding:12px 32px;
                  font-size:1.1rem; cursor:pointer;
@@ -814,10 +807,10 @@ function selectPatternOption(btn) {
 
 
 // Check the gate pattern answer
-function checkGatePattern(puzzleId, correctAnswer, puzzleData) {
-  const selected = document.querySelector(
-    '.pattern-option[style*="E3F2FD"]'
-  );
+function checkGatePattern(puzzleId, correctAnswer) {
+  const puzzleData = gameState.activePuzzle;
+  if (!puzzleData) return;
+  const selected = document.querySelector('.pattern-option[style*="E3F2FD"]');  
 
   if (!selected) {
     puzzleFailed(puzzleId, 'Choose a shape first!');
@@ -873,7 +866,9 @@ function checkGatePattern(puzzleId, correctAnswer, puzzleData) {
 
 
 // Complete World 1 — called when all 3 keys inserted
-function completeWorld1(puzzleData) {
+function completeWorld1() {
+  const puzzleData = gameState.activePuzzle;
+  if (!puzzleData) return;
   hide(elements.puzzleOverlay);
   elements.puzzleContainer.innerHTML = '';
 
