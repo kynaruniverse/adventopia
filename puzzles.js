@@ -190,15 +190,20 @@ function handleTouchStart(e) {
   touchClone.style.width     = rect.width + 'px';
   touchClone.style.left      = (touch.clientX - touchOffsetX) + 'px';
   touchClone.style.top       = (touch.clientY - touchOffsetY) + 'px';
+  touchClone._offsetX = touchOffsetX;
+  touchClone._offsetY = touchOffsetY;
   document.body.appendChild(touchClone);
 }
 
 function handleTouchMove(e) {
   e.preventDefault();
-  if (!touchClone) return;
-  const touch = e.touches[0];
-  touchClone.style.left = (touch.clientX - touchOffsetX) + 'px';
-  touchClone.style.top  = (touch.clientY - touchOffsetY) + 'px';
+  const clone = touchClone || pageTouchClone;
+  if (!clone) return;
+  const touch   = e.touches[0];
+  const offsetX = clone._offsetX || 0;
+  const offsetY = clone._offsetY || 0;
+  clone.style.left = (touch.clientX - offsetX) + 'px';
+  clone.style.top  = (touch.clientY - offsetY) + 'px';
 }
 
 function handleTouchEnd(e) {
@@ -502,17 +507,21 @@ let pageTouchClone = null;
 
 function handlePageTouchStart(e) {
   pageTouchEl = e.currentTarget;
-  const touch = e.touches[0];
-  const rect  = pageTouchEl.getBoundingClientRect();
+  const touch  = e.touches[0];
+  const rect   = pageTouchEl.getBoundingClientRect();
+  const offsetX = touch.clientX - rect.left;
+  const offsetY = touch.clientY - rect.top;
 
   pageTouchClone = pageTouchEl.cloneNode(true);
-  pageTouchClone.style.position     = 'fixed';
-  pageTouchClone.style.opacity      = '0.75';
-  pageTouchClone.style.zIndex       = '9999';
+  pageTouchClone.style.position      = 'fixed';
+  pageTouchClone.style.opacity       = '0.75';
+  pageTouchClone.style.zIndex        = '9999';
   pageTouchClone.style.pointerEvents = 'none';
-  pageTouchClone.style.width        = rect.width + 'px';
-  pageTouchClone.style.left         = touch.clientX + 'px';
-  pageTouchClone.style.top          = touch.clientY + 'px';
+  pageTouchClone.style.width         = rect.width + 'px';
+  pageTouchClone.style.left          = (touch.clientX - offsetX) + 'px';
+  pageTouchClone.style.top           = (touch.clientY - offsetY) + 'px';
+  pageTouchClone._offsetX            = offsetX;
+  pageTouchClone._offsetY            = offsetY;
   document.body.appendChild(pageTouchClone);
 }
 
@@ -527,14 +536,17 @@ function handlePageTouchEnd(e) {
   const pool = target ? target.closest('#page-pool') : null;
 
   if (slot) {
-    // Send any existing page in slot back to pool
     const existing = slot.querySelector('.story-page');
     if (existing) {
       document.getElementById('page-pool').appendChild(existing);
     }
     slot.innerHTML = '';
+    const correctVal = pageTouchEl.getAttribute('data-correct');
+    const idVal      = pageTouchEl.getAttribute('data-id');
     slot.appendChild(pageTouchEl);
-
+    pageTouchEl.setAttribute('data-correct', correctVal);
+    pageTouchEl.setAttribute('data-id', idVal);
+    
   } else if (pool) {
     // Return to pool
     const parentSlot = pageTouchEl.closest('.page-slot');
@@ -786,20 +798,22 @@ function renderGatePatternPuzzle(puzzleData) {
 function selectPatternOption(btn) {
   // Deselect all options
   document.querySelectorAll('.pattern-option').forEach(opt => {
-    opt.style.background   = '#F5F5F5';
-    opt.style.borderColor  = '#BDBDBD';
-    opt.style.transform    = 'scale(1)';
+    opt.style.background  = '#F5F5F5';
+    opt.style.borderColor = '#BDBDBD';
+    opt.style.transform   = 'scale(1)';
+    opt.classList.remove('pattern-selected');
   });
 
   // Select this one
   btn.style.background  = '#E3F2FD';
   btn.style.borderColor = '#2C5F8A';
   btn.style.transform   = 'scale(1.08)';
+  btn.classList.add('pattern-selected');
 
   // Show selected symbol in answer slot
   const slot = document.getElementById('answer-slot');
   if (slot) {
-    slot.textContent = getSymbolEmoji(btn.dataset.symbol);
+    slot.textContent   = getSymbolEmoji(btn.dataset.symbol);
     slot.style.borderColor = '#2C5F8A';
     slot.style.background  = '#E3F2FD';
   }
@@ -810,7 +824,7 @@ function selectPatternOption(btn) {
 function checkGatePattern(puzzleId, correctAnswer) {
   const puzzleData = gameState.activePuzzle;
   if (!puzzleData) return;
-  const selected = document.querySelector('.pattern-option[style*="E3F2FD"]');  
+  const selected = document.querySelector('.pattern-option.pattern-selected');  
 
   if (!selected) {
     puzzleFailed(puzzleId, 'Choose a shape first!');
