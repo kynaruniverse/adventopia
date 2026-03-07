@@ -30,8 +30,8 @@
       "w": 22,
       "h": 40,
       "color": "#FFD700",
-      "dialogue": "The gate panel glows softly. Three key slots wait to be filled, and a pattern lock sits above them.",
-      "puzzle": "puzzle3_gate_pattern"
+      "dialogue": "The gate is locked. Find Gus the Gatekeeper and complete the puzzle to earn your third key and unlock the gate!",
+      "puzzle": null
     },
     {
       "id": "signpost",

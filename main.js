@@ -390,6 +390,25 @@ function attemptSceneNavigation(targetSceneId) {
 
 
 function handleObjectClick(obj) {
+  // Special case — gate panel behaves differently
+  // based on whether puzzle 3 is solved
+  if (obj.id === 'gate_panel') {
+    const patternSolved = gameState.solvedPuzzles.includes(
+      'puzzle3_gate_pattern_pattern'
+    );
+    if (patternSolved) {
+      // Pattern done — open key insertion stage
+      triggerPuzzle('puzzle3_gate_pattern');
+    } else {
+      // Not done yet — show locked message
+      showDialogue(
+        "The gate is locked. Find Gus the Gatekeeper and " +
+        "complete the puzzle to earn your third key and unlock the gate!"
+      );
+    }
+    return;
+  }
+
   if (obj.dialogue) {
     showDialogue(obj.dialogue);
   }
