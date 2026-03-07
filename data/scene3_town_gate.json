@@ -8,6 +8,8 @@
     "id": "key_piece_2"
   },
   "entryDialogue": "We are almost there, Pip! This is the Town Gate. Help Gus and use your key pieces to unlock the way forward!",
+  "previousScene": "scene2_library",
+  "nextScene": null,
   "objects": [
     {
       "id": "gus_gatekeeper",

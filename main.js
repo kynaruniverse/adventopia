@@ -17,7 +17,8 @@ const gameState = {
   achievements: [],
   hintIndex: {},
   audioEnabled: true,
-  gameStarted: false
+  gameStarted: false,
+  navArrows: []
 };
 
 
@@ -128,6 +129,23 @@ function resizeCanvas() {
   elements.canvas.height = sceneArea.offsetHeight;
 }
 
+// -----------------------------------------------
+// SCENE TRANSITION
+// Fades out then loads the new scene
+// -----------------------------------------------
+
+function transitionToScene(sceneId) {
+  let opacity = 0;
+  const fadeIn = setInterval(() => {
+    opacity += 0.08;
+    ctx.fillStyle = `rgba(0,0,0,${Math.min(opacity, 1)})`;
+    ctx.fillRect(0, 0, elements.canvas.width, elements.canvas.height);
+    if (opacity >= 1) {
+      clearInterval(fadeIn);
+      loadScene(sceneId);
+    }
+  }, 20);
+}
 
 // -----------------------------------------------
 // 6. SCENE LOADER
@@ -162,15 +180,13 @@ function renderScene(sceneData) {
   ctx.fillStyle = sceneData.backgroundColor || '#87CEEB';
   ctx.fillRect(0, 0, elements.canvas.width, elements.canvas.height);
 
-  // Draw scene name as placeholder text
-  ctx.fillStyle = '#333';
-  ctx.font = 'bold 28px Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText(
-    sceneData.name || 'Scene',
-    elements.canvas.width / 2,
-    elements.canvas.height / 2
-  );
+  // Draw scene name top left
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillRect(0, 0, elements.canvas.width, 44);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 18px Arial';
+  ctx.textAlign = 'left';
+  ctx.fillText(sceneData.name || 'Scene', 16, 28);
 
   // Draw placeholder objects
   if (sceneData.objects) {
@@ -179,16 +195,100 @@ function renderScene(sceneData) {
     });
   }
 
+  // Draw navigation arrows if available
+  drawNavigationArrows(sceneData);
+
   // Set up click detection
   setupSceneClicks(sceneData);
+
+  // Show entry dialogue if first visit
+  if (sceneData.entryDialogue) {
+    const visitKey = `visited_${sceneData.id}`;
+    if (!sessionStorage.getItem(visitKey)) {
+      sessionStorage.setItem(visitKey, 'true');
+      setTimeout(() => showDialogue(sceneData.entryDialogue), 600);
+    }
+  }
 }
 
+// -----------------------------------------------
+// NAVIGATION ARROWS
+// Draws left and right arrows for scene movement
+// -----------------------------------------------
 
+function drawNavigationArrows(sceneData) {
+  const cw = elements.canvas.width;
+  const ch = elements.canvas.height;
+
+  // Store arrow hit zones for click detection
+  gameState.navArrows = [];
+
+  // Left arrow — go to previous scene
+  if (sceneData.previousScene) {
+    drawArrow('left', 20, ch / 2, sceneData.previousScene);
+    gameState.navArrows.push({
+      direction: 'left',
+      x: 10,
+      y: ch / 2 - 40,
+      w: 60,
+      h: 80,
+      targetScene: sceneData.previousScene
+    });
+  }
+
+  // Right arrow — go to next scene
+  if (sceneData.nextScene) {
+    const isLocked = isSceneLocked(sceneData.nextScene);
+    drawArrow('right', cw - 20, ch / 2, sceneData.nextScene, isLocked);
+    gameState.navArrows.push({
+      direction: 'right',
+      x: cw - 70,
+      y: ch / 2 - 40,
+      w: 60,
+      h: 80,
+      targetScene: sceneData.nextScene,
+      locked: isLocked
+    });
+  }
+}
+
+function drawArrow(direction, x, y, targetScene, locked = false) {
+  ctx.save();
+  ctx.globalAlpha = locked ? 0.35 : 0.85;
+  ctx.fillStyle = locked ? '#999999' : '#ffffff';
+  ctx.strokeStyle = locked ? '#666666' : '#2C5F8A';
+  ctx.lineWidth = 3;
+
+  ctx.beginPath();
+  if (direction === 'left') {
+    ctx.moveTo(x + 40, y - 30);
+    ctx.lineTo(x,      y);
+    ctx.lineTo(x + 40, y + 30);
+  } else {
+    ctx.moveTo(x - 40, y - 30);
+    ctx.lineTo(x,      y);
+    ctx.lineTo(x - 40, y + 30);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Lock icon if locked
+  if (locked) {
+    ctx.fillStyle = '#666666';
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('🔒', x, y + 60);
+  }
+
+  ctx.restore();
+}
 // -----------------------------------------------
 // 8. PLACEHOLDER OBJECT DRAWING
 // Draws simple coloured boxes for objects
 // until real art assets are ready
 // -----------------------------------------------
+
 
 function drawPlaceholderObject(obj) {
   const x = (obj.x / 100) * elements.canvas.width;
@@ -223,6 +323,20 @@ function setupSceneClicks(sceneData) {
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
 
+    // Check navigation arrows first
+    if (gameState.navArrows) {
+      for (const arrow of gameState.navArrows) {
+        if (
+          mouseX >= arrow.x && mouseX <= arrow.x + arrow.w &&
+          mouseY >= arrow.y && mouseY <= arrow.y + arrow.h
+        ) {
+          attemptSceneNavigation(arrow.targetScene);
+          return;
+        }
+      }
+    }
+
+    // Check scene objects
     if (!sceneData.objects) return;
 
     sceneData.objects.forEach(obj => {
@@ -240,6 +354,38 @@ function setupSceneClicks(sceneData) {
     });
   };
 }
+
+// -----------------------------------------------
+// SCENE LOCK CHECKING
+// Checks if a scene is locked based on
+// key pieces collected
+// -----------------------------------------------
+
+function isSceneLocked(sceneId) {
+  // Fetch scene data from already loaded cache
+  // For now check against known unlock requirements
+  const unlockMap = {
+    'scene2_library':   'key_piece_1',
+    'scene3_town_gate': 'key_piece_2'
+  };
+
+  const requiredKey = unlockMap[sceneId];
+  if (!requiredKey) return false;
+
+  return !gameState.collectedKeyPieces.includes(requiredKey);
+}
+
+function attemptSceneNavigation(targetSceneId) {
+  if (isSceneLocked(targetSceneId)) {
+    showDialogue(
+      "This area is locked for now. " +
+      "Solve the puzzle here first to earn a key piece!"
+    );
+    return;
+  }
+  transitionToScene(targetSceneId);
+}
+
 
 function handleObjectClick(obj) {
   if (obj.dialogue) {
