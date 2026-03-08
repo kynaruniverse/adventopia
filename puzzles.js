@@ -908,6 +908,7 @@ function completeWorld1() {
 // World complete celebration screen
 function showWorldCompleteScreen(puzzleData) {
   const reward = puzzleData.reward;
+  playSFX('sfx_world_complete');
 
   // Add Village Hero badge
   if (reward.badge && !gameState.achievements.includes(reward.badge)) {

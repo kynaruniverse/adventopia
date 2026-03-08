@@ -137,6 +137,7 @@ function resizeCanvas() {
 // -----------------------------------------------
 
 function transitionToScene(sceneId) {
+  playSFX('sfx_scene_transition');
   let opacity = 0;
   const fadeIn = setInterval(() => {
     opacity += 0.08;
@@ -481,6 +482,7 @@ function attemptSceneNavigation(targetSceneId) {
 let pendingPuzzle = null;
 
 function handleObjectClick(obj) {
+  playSFX('sfx_click');
   // Special case — gate panel
   if (obj.id === 'gate_panel') {
     const patternSolved = gameState.solvedPuzzles.includes('puzzle3_gate_pattern_pattern');
@@ -527,6 +529,7 @@ function handleObjectClick(obj) {
 function showDialogue(text) {
   elements.dialogueText.textContent = text;
   show(elements.dialogueBox);
+  playSFX('sfx_dialogue');
 }
 
 elements.dialogueClose.addEventListener('click', () => {
@@ -613,10 +616,12 @@ function puzzleSolved(puzzleId, reward) {
   saveProgress();
   hide(elements.puzzleOverlay);
   elements.puzzleContainer.innerHTML = '';
+  playSFX('sfx_puzzle_complete');
   showReward(reward);
 }
 
 function puzzleFailed(puzzleId, failureMessage) {
+  playSFX('sfx_wrong');
   if (!gameState.puzzleAttempts[puzzleId]) {
     gameState.puzzleAttempts[puzzleId] = 0;
   }
@@ -664,6 +669,7 @@ function showHint(puzzleId, hints) {
       "You're doing great — keep trying, you'll get it!";
   }
 
+  playSFX('sfx_hint');
   show(elements.hintOverlay);
 }
 
@@ -696,6 +702,7 @@ function collectItem(item) {
     gameState.inventory.push(item.id);
     saveProgress();
     updateInventoryDisplay();
+    playSFX('sfx_collect');
     showReward({
       text: `You picked up: ${item.label}!`,
       badge: null
@@ -731,11 +738,13 @@ function updateInventoryDisplay() {
 function showReward(reward) {
   elements.rewardText.textContent = reward.text || 'Well done!';
   show(elements.rewardOverlay);
+  playSFX('sfx_reward');
 
   if (reward.keyPiece) {
     gameState.collectedKeyPieces.push(reward.keyPiece);
     saveProgress();
     updateInventoryDisplay();
+    playSFX('sfx_key_collect');
   }
 
   if (reward.badge) {
@@ -777,8 +786,24 @@ function checkWorldComplete() {
 const audioEngine = {
   bgMusic:    null,
   currentSrc: null,
-  enabled:    true
+  enabled:    true,
+  sfxPool:    {}       // cache for reuse
 };
+
+// -----------------------------------------------
+// PLAY SFX
+// Plays a one-shot sound effect by name
+// Respects the master audio toggle
+// -----------------------------------------------
+function playSFX(name) {
+  if (!audioEngine.enabled) return;
+  try {
+    const src = `assets/audio/${name}.mp3`;
+    const audio = new Audio(src);
+    audio.volume = 0.7;
+    audio.play().catch(() => {});
+  } catch(e) {}
+}
 
 function playSceneMusic(src) {
   if (!src) return;
@@ -792,7 +817,7 @@ function playSceneMusic(src) {
 
   audioEngine.bgMusic         = new Audio(src);
   audioEngine.bgMusic.loop    = true;
-  audioEngine.bgMusic.volume  = 0.45;
+  audioEngine.bgMusic.volume  = 0.38;
   audioEngine.currentSrc      = src;
 
   if (audioEngine.enabled) {

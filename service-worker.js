@@ -4,7 +4,7 @@
    ============================================= */
 
 
-const CACHE_NAME = 'adventopia-v3';
+const CACHE_NAME = 'adventopia-v4';
 
 const CORE_FILES = [
   '/adventopia/',
@@ -20,7 +20,20 @@ const CORE_FILES = [
   '/adventopia/data/scene3_town_gate.json',
   '/adventopia/data/puzzle1_bread_sort.json',
   '/adventopia/data/puzzle2_story_pages.json',
-  '/adventopia/data/puzzle3_gate_pattern.json'
+  '/adventopia/data/puzzle3_gate_pattern.json',
+  '/adventopia/assets/audio/music_village.mp3',
+  '/adventopia/assets/audio/music_library.mp3',
+  '/adventopia/assets/audio/music_gate.mp3',
+  '/adventopia/assets/audio/sfx_click.mp3',
+  '/adventopia/assets/audio/sfx_collect.mp3',
+  '/adventopia/assets/audio/sfx_dialogue.mp3',
+  '/adventopia/assets/audio/sfx_hint.mp3',
+  '/adventopia/assets/audio/sfx_key_collect.mp3',
+  '/adventopia/assets/audio/sfx_puzzle_complete.mp3',
+  '/adventopia/assets/audio/sfx_reward.mp3',
+  '/adventopia/assets/audio/sfx_scene_transition.mp3',
+  '/adventopia/assets/audio/sfx_world_complete.mp3',
+  '/adventopia/assets/audio/sfx_wrong.mp3',
 ];
 
 
