@@ -11,6 +11,7 @@ const CORE_FILES = [
   '/adventopia/index.html',
   '/adventopia/style.css',
   '/adventopia/main.js',
+  '/adventopia/scene-art.js',
   '/adventopia/puzzles.js',
   '/adventopia/manifest.json',
   '/adventopia/data/world1.json',

@@ -205,23 +205,16 @@ function renderScene(sceneData) {
 }
 
 function renderSceneBackground(sceneData) {
-  ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
-  ctx.fillStyle = sceneData.backgroundColor || '#87CEEB';
-  ctx.fillRect(0, 0, elements.canvas.width, elements.canvas.height);
-
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.fillRect(0, 0, elements.canvas.width, 44);
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 18px Arial';
-  ctx.textAlign = 'left';
-  ctx.fillText(sceneData.name || 'Scene', 16, 28);
+  // Full illustrated scene via art engine
+  drawSceneArt(ctx, sceneData, elements.canvas.width, elements.canvas.height);
 }
 
 function renderSceneObjects(sceneData, hoverX, hoverY) {
-  // Repaint background so hover is clean
-  renderSceneBackground(sceneData);
+  // Repaint full scene art
+  drawSceneArt(ctx, sceneData, elements.canvas.width, elements.canvas.height);
 
-  if (sceneData.objects) {
+  // Overlay hover glow + tooltip on the hovered object
+  if (sceneData.objects && hoverX >= 0) {
     sceneData.objects.forEach(obj => {
       const x = (obj.x / 100) * elements.canvas.width;
       const y = (obj.y / 100) * elements.canvas.height;
@@ -231,7 +224,9 @@ function renderSceneObjects(sceneData, hoverX, hoverY) {
         hoverX >= x && hoverX <= x + w &&
         hoverY >= y && hoverY <= y + h
       );
-      drawPlaceholderObject(obj, isHovered);
+      if (isHovered) {
+        drawObjectArt(ctx, obj, elements.canvas.width, elements.canvas.height, true);
+      }
     });
   }
 
