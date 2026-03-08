@@ -161,6 +161,12 @@ async function loadScene(sceneId) {
     const sceneData = await response.json();
     gameState.currentScene = sceneId;
     renderScene(sceneData);
+
+    // Start scene music if available
+    if (sceneData.music) {
+      playSceneMusic(sceneData.music);
+    }
+
     saveProgress();
   } catch (err) {
     console.error('Scene load error:', err);
@@ -174,33 +180,18 @@ async function loadScene(sceneId) {
 // Draws the scene background and objects
 // -----------------------------------------------
 
+// Store current scene data so resize can re-render
+let activeSceneData = null;
+
 function renderScene(sceneData) {
   resizeCanvas();
-  ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
+  activeSceneData = sceneData;
 
-  // Draw background colour as placeholder
-  ctx.fillStyle = sceneData.backgroundColor || '#87CEEB';
-  ctx.fillRect(0, 0, elements.canvas.width, elements.canvas.height);
+  // Draw background + objects (no hover)
+  renderSceneBackground(sceneData);
+  renderSceneObjects(sceneData, -1, -1);
 
-  // Draw scene name top left
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.fillRect(0, 0, elements.canvas.width, 44);
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 18px Arial';
-  ctx.textAlign = 'left';
-  ctx.fillText(sceneData.name || 'Scene', 16, 28);
-
-  // Draw placeholder objects
-  if (sceneData.objects) {
-    sceneData.objects.forEach(obj => {
-      drawPlaceholderObject(obj);
-    });
-  }
-
-  // Draw navigation arrows if available
-  drawNavigationArrows(sceneData);
-
-  // Set up click detection
+  // Set up click + hover detection
   setupSceneClicks(sceneData);
 
   // Show entry dialogue if first visit
@@ -211,6 +202,40 @@ function renderScene(sceneData) {
       setTimeout(() => showDialogue(sceneData.entryDialogue), 600);
     }
   }
+}
+
+function renderSceneBackground(sceneData) {
+  ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
+  ctx.fillStyle = sceneData.backgroundColor || '#87CEEB';
+  ctx.fillRect(0, 0, elements.canvas.width, elements.canvas.height);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillRect(0, 0, elements.canvas.width, 44);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 18px Arial';
+  ctx.textAlign = 'left';
+  ctx.fillText(sceneData.name || 'Scene', 16, 28);
+}
+
+function renderSceneObjects(sceneData, hoverX, hoverY) {
+  // Repaint background so hover is clean
+  renderSceneBackground(sceneData);
+
+  if (sceneData.objects) {
+    sceneData.objects.forEach(obj => {
+      const x = (obj.x / 100) * elements.canvas.width;
+      const y = (obj.y / 100) * elements.canvas.height;
+      const w = (obj.w / 100) * elements.canvas.width;
+      const h = (obj.h / 100) * elements.canvas.height;
+      const isHovered = (
+        hoverX >= x && hoverX <= x + w &&
+        hoverY >= y && hoverY <= y + h
+      );
+      drawPlaceholderObject(obj, isHovered);
+    });
+  }
+
+  drawNavigationArrows(sceneData);
 }
 
 // -----------------------------------------------
@@ -292,24 +317,44 @@ function drawArrow(direction, x, y, targetScene, locked = false) {
 // -----------------------------------------------
 
 
-function drawPlaceholderObject(obj) {
+function drawPlaceholderObject(obj, isHovered = false) {
   const x = (obj.x / 100) * elements.canvas.width;
   const y = (obj.y / 100) * elements.canvas.height;
   const w = (obj.w / 100) * elements.canvas.width;
   const h = (obj.h / 100) * elements.canvas.height;
 
+  ctx.save();
+
+  // Glow / lift effect on hover
+  if (isHovered) {
+    ctx.shadowColor  = '#ffffff';
+    ctx.shadowBlur   = 18;
+    ctx.globalAlpha  = 1;
+  }
+
   ctx.fillStyle   = obj.color || '#FFD700';
-  ctx.strokeStyle = '#333';
-  ctx.lineWidth   = 2;
+  ctx.strokeStyle = isHovered ? '#ffffff' : '#333';
+  ctx.lineWidth   = isHovered ? 3 : 2;
   ctx.beginPath();
   ctx.roundRect(x, y, w, h, 8);
   ctx.fill();
   ctx.stroke();
 
+  ctx.restore();
+
+  // Label
   ctx.fillStyle = '#333';
-  ctx.font      = 'bold 13px Arial';
+  ctx.font      = `${isHovered ? 'bold' : 'bold'} 13px Arial`;
   ctx.textAlign = 'center';
   ctx.fillText(obj.label || obj.id, x + w / 2, y + h / 2 + 5);
+
+  // Tap indicator for touch users
+  if (isHovered) {
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font      = '11px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('tap to interact', x + w / 2, y + h - 6);
+  }
 }
 
 
@@ -320,6 +365,54 @@ function drawPlaceholderObject(obj) {
 // -----------------------------------------------
 
 function setupSceneClicks(sceneData) {
+
+  // HOVER — highlight objects under the cursor
+  elements.canvas.onmousemove = function(e) {
+    const rect   = elements.canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    let overObject = false;
+
+    // Check nav arrows
+    if (gameState.navArrows) {
+      for (const arrow of gameState.navArrows) {
+        if (
+          mouseX >= arrow.x && mouseX <= arrow.x + arrow.w &&
+          mouseY >= arrow.y && mouseY <= arrow.y + arrow.h
+        ) {
+          overObject = true;
+          break;
+        }
+      }
+    }
+
+    // Check scene objects
+    if (!overObject && sceneData.objects) {
+      for (const obj of sceneData.objects) {
+        const x = (obj.x / 100) * elements.canvas.width;
+        const y = (obj.y / 100) * elements.canvas.height;
+        const w = (obj.w / 100) * elements.canvas.width;
+        const h = (obj.h / 100) * elements.canvas.height;
+        if (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) {
+          overObject = true;
+          break;
+        }
+      }
+    }
+
+    elements.canvas.style.cursor = overObject ? 'pointer' : 'default';
+
+    // Redraw scene with hover highlight
+    renderSceneObjects(sceneData, mouseX, mouseY);
+  };
+
+  elements.canvas.onmouseleave = function() {
+    elements.canvas.style.cursor = 'default';
+    renderSceneObjects(sceneData, -1, -1);
+  };
+
+  // CLICK
   elements.canvas.onclick = function(e) {
     const rect   = elements.canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
@@ -389,32 +482,42 @@ function attemptSceneNavigation(targetSceneId) {
 }
 
 
+// Pending puzzle to trigger after dialogue is dismissed
+let pendingPuzzle = null;
+
 function handleObjectClick(obj) {
-  // Special case — gate panel behaves differently
-  // based on whether puzzle 3 is solved
+  // Special case — gate panel
   if (obj.id === 'gate_panel') {
-    const patternSolved = gameState.solvedPuzzles.includes(
-      'puzzle3_gate_pattern_pattern'
-    );
+    const patternSolved = gameState.solvedPuzzles.includes('puzzle3_gate_pattern_pattern');
     if (patternSolved) {
-      // Pattern done — open key insertion stage
       triggerPuzzle('puzzle3_gate_pattern');
     } else {
-      // Not done yet — show locked message
       showDialogue(
-        "The gate is locked. Find Gus the Gatekeeper and " +
-        "complete the puzzle to earn your third key and unlock the gate!"
+        'The gate is locked. Find Gus the Gatekeeper and ' +
+        'complete the puzzle to earn your third key and unlock the gate!'
       );
     }
     return;
   }
 
+  // If the object has both dialogue AND a puzzle:
+  // show dialogue first, then trigger puzzle when player clicks OK
+  if (obj.dialogue && obj.puzzle) {
+    pendingPuzzle = obj.puzzle;
+    showDialogue(obj.dialogue);
+    return;
+  }
+
+  // Dialogue only
   if (obj.dialogue) {
     showDialogue(obj.dialogue);
   }
+
+  // Puzzle only (no dialogue)
   if (obj.puzzle) {
     triggerPuzzle(obj.puzzle);
   }
+
   if (obj.collectItem) {
     collectItem(obj.collectItem);
   }
@@ -433,6 +536,13 @@ function showDialogue(text) {
 
 elements.dialogueClose.addEventListener('click', () => {
   hide(elements.dialogueBox);
+
+  // If an NPC triggered a puzzle after their dialogue, launch it now
+  if (pendingPuzzle) {
+    const puzzleToLoad = pendingPuzzle;
+    pendingPuzzle = null;
+    setTimeout(() => triggerPuzzle(puzzleToLoad), 150);
+  }
 });
 
 
@@ -567,9 +677,15 @@ elements.hintClose.addEventListener('click', () => {
 });
 
 elements.hintBtn.addEventListener('click', () => {
+  // If a puzzle is open and has hints — use those
+  if (gameState.activePuzzle && gameState.activePuzzle.hints) {
+    showHint(gameState.activePuzzle.id, gameState.activePuzzle.hints);
+    return;
+  }
+  // Otherwise give a general exploration hint
   if (gameState.currentScene) {
     elements.hintText.textContent =
-      "Click on something in the scene to explore. Look for characters to talk to!";
+      'Look around the scene — click on characters and objects to explore. Find someone who needs help!';
     show(elements.hintOverlay);
   }
 });
@@ -658,13 +774,68 @@ function checkWorldComplete() {
 
 
 // -----------------------------------------------
-// 16. AUDIO TOGGLE
+// 16. AUDIO ENGINE
+// Background music + sound effects
+// Fully toggleable, scene-aware
 // -----------------------------------------------
 
+const audioEngine = {
+  bgMusic:    null,
+  currentSrc: null,
+  enabled:    true
+};
+
+function playSceneMusic(src) {
+  if (!src) return;
+
+  // Already playing the same track — don't restart
+  if (audioEngine.currentSrc === src && audioEngine.bgMusic && !audioEngine.bgMusic.paused) {
+    return;
+  }
+
+  stopMusic();
+
+  audioEngine.bgMusic         = new Audio(src);
+  audioEngine.bgMusic.loop    = true;
+  audioEngine.bgMusic.volume  = 0.45;
+  audioEngine.currentSrc      = src;
+
+  if (audioEngine.enabled) {
+    audioEngine.bgMusic.play().catch(() => {
+      // Autoplay blocked — wait for first user gesture
+      document.addEventListener('click', function resumeAudio() {
+        if (audioEngine.enabled && audioEngine.bgMusic) {
+          audioEngine.bgMusic.play().catch(() => {});
+        }
+        document.removeEventListener('click', resumeAudio);
+      }, { once: true });
+    });
+  }
+}
+
+function stopMusic() {
+  if (audioEngine.bgMusic) {
+    audioEngine.bgMusic.pause();
+    audioEngine.bgMusic.currentTime = 0;
+    audioEngine.bgMusic = null;
+    audioEngine.currentSrc = null;
+  }
+}
+
 elements.audioBtn.addEventListener('click', () => {
-  gameState.audioEnabled = !gameState.audioEnabled;
-  elements.audioBtn.textContent =
-    gameState.audioEnabled ? '🔊 Audio' : '🔇 Audio';
+  audioEngine.enabled = !audioEngine.enabled;
+  gameState.audioEnabled = audioEngine.enabled;
+  elements.audioBtn.textContent = audioEngine.enabled ? '🔊 Audio' : '🔇 Audio';
+
+  if (audioEngine.enabled) {
+    if (audioEngine.bgMusic) {
+      audioEngine.bgMusic.play().catch(() => {});
+    }
+  } else {
+    if (audioEngine.bgMusic) {
+      audioEngine.bgMusic.pause();
+    }
+  }
 });
 
 
@@ -697,10 +868,12 @@ async function initGame() {
   }
 }
 
-// Handle window resize
+// Handle window resize — re-render the active scene
 window.addEventListener('resize', () => {
-  if (gameState.gameStarted && gameState.currentScene) {
+  if (gameState.gameStarted && activeSceneData) {
     resizeCanvas();
+    renderSceneObjects(activeSceneData, -1, -1);
+    setupSceneClicks(activeSceneData);
   }
 });
 

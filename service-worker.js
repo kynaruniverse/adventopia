@@ -6,13 +6,20 @@
 
 const CACHE_NAME = 'adventopia-v3';
 
-// Files to cache for offline play
 const CORE_FILES = [
   '/adventopia/',
   '/adventopia/index.html',
   '/adventopia/style.css',
   '/adventopia/main.js',
-  '/adventopia/manifest.json'
+  '/adventopia/puzzles.js',
+  '/adventopia/manifest.json',
+  '/adventopia/data/world1.json',
+  '/adventopia/data/scene1_village_square.json',
+  '/adventopia/data/scene2_library.json',
+  '/adventopia/data/scene3_town_gate.json',
+  '/adventopia/data/puzzle1_bread_sort.json',
+  '/adventopia/data/puzzle2_story_pages.json',
+  '/adventopia/data/puzzle3_gate_pattern.json'
 ];
 
 
