@@ -1,5 +1,15 @@
 # 🗺️ Adventopia
 
+## 🚀 How to Play (2026 Version)
+
+**Install as PWA** for the best experience:
+1. Open [your-site.com](https://your-site.com)
+2. Tap the big **PLAY ADVENTOPIA** button
+3. Tap the **📱 Install on Home Screen** button
+4. Launch from your home screen — full-screen landscape adventure!
+
+The game now works **offline** and is **landscape-only** for the best visuals and touch controls.
+
 **Adventopia** is a story-driven educational adventure game designed for all ages, with a strong focus on SEN (Special Educational Needs) accessibility. Inspired by ClueFinders and Jump Ahead, players explore magical worlds, talk to characters, and solve puzzles to progress.
 
 ---

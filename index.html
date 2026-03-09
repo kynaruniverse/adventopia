@@ -1,174 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#2C5F8A" />
-  <meta name="description" content="Adventopia — Explore, Learn, Play. A story-driven educational adventure game." />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Adventopia" />
-  
-  <title>Adventopia</title>
-  
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json" />
-  
-  <!-- Apple Touch Icon -->
-  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
-  
-  <!-- Stylesheet -->
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adventopia – Magical Learning Adventures</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',Arial,sans-serif; background:linear-gradient(135deg,#0f172a,#1e3a8a); color:white; text-align:center; line-height:1.6; }
+    .hero { padding:80px 20px; max-width:800px; margin:0 auto; }
+    h1 { font-size:3.2rem; margin-bottom:16px; text-shadow:0 4px 15px rgba(0,0,0,0.4); }
+    .lead { font-size:1.25rem; opacity:0.95; margin-bottom:40px; }
+    .btn { display:inline-block; padding:18px 50px; margin:10px; background:#FFD700; color:#1e3a8a; border-radius:50px; text-decoration:none; font-weight:bold; font-size:1.5rem; box-shadow:0 10px 25px rgba(255,215,0,0.5); }
+    .btn.install { background:#4CAF50; color:white; }
+    section { padding:60px 20px; max-width:900px; margin:0 auto; }
+    h2 { font-size:2.2rem; margin-bottom:30px; color:#FFD700; }
+    .gallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:30px; }
+    .card { background:rgba(255,255,255,0.1); border-radius:20px; padding:30px; backdrop-filter:blur(10px); }
+    .printables-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; }
+    .print-link { background:rgba(255,255,255,0.15); padding:20px; border-radius:15px; text-decoration:none; color:white; font-weight:bold; }
+    footer { background:rgba(0,0,0,0.3); padding:30px; font-size:0.9rem; opacity:0.8; }
+  </style>
 </head>
 <body>
-  
-  <!-- ORIENTATION WARNING
-       Shows if user is in portrait mode on mobile/tablet -->
-  <div id="orientation-warning">
-    <h2>📱 Please Rotate Your Device</h2>
-    <p>Adventopia is best played in landscape mode for the full experience. Please rotate your device to landscape.</p>
-  </div>
-  
-  <!-- LOADING SCREEN -->
-  <div id="loading-screen">
+  <div class="hero">
     <h1>🗺️ Adventopia</h1>
-    <p>Loading your adventure...</p>
+    <p class="lead">Explore magical worlds, solve puzzles, and learn with Pip & Shell the tortoise!</p>
+    <a href="game/" class="btn">▶️ PLAY THE GAME</a>
+    <button onclick="promptInstall()" class="btn install">📱 Install on Home Screen</button>
   </div>
-  
-  <!-- GAME CONTAINER -->
-  <div id="game-container" class="hidden">
-    
-    <!-- HUD — top bar with inventory and buttons -->
-    <div id="hud">
-      <div id="inventory-bar"></div>
-      <div id="hud-buttons">
-        <button id="hint-btn" title="Get a hint">💡 Hint</button>
-        <button id="audio-btn" title="Toggle audio">🔊 Audio</button>
-      </div>
+
+  <section>
+    <h2>Meet Your Friends</h2>
+    <div class="gallery">
+      <div class="card"><h3>🧒 Pip</h3><p>Your brave explorer!</p></div>
+      <div class="card"><h3>🐢 Shell</h3><p>Pip's loyal tortoise friend</p></div>
+      <div class="card"><h3>🍞 Benny</h3><p>The Baker who needs help sorting bread</p></div>
+      <div class="card"><h3>📚 Mara</h3><p>The Librarian with mixed-up story pages</p></div>
+      <div class="card"><h3>🛡️ Gus</h3><p>The Gatekeeper who forgot the pattern</p></div>
     </div>
-    
-    <!-- SCENE AREA — where backgrounds and objects appear -->
-    <div id="scene-area">
-      <canvas id="game-canvas"></canvas>
+  </section>
+
+  <section>
+    <h2>Free Printables</h2>
+    <div class="printables-grid">
+      <a href="printables/coloring-pip.html" class="print-link" target="_blank">🧒 Pip Coloring Page</a>
+      <a href="printables/coloring-shell.html" class="print-link" target="_blank">🐢 Shell Coloring Page</a>
+      <a href="printables/bread-sort-worksheet.html" class="print-link" target="_blank">🍞 Bread Sort Worksheet</a>
+      <a href="printables/badges-print.html" class="print-link" target="_blank">🏆 Badges to Cut Out</a>
     </div>
-    
-    <!-- DIALOGUE BOX — for NPC speech and story text -->
-    <div id="dialogue-box" class="hidden">
-      <p id="dialogue-text"></p>
-      <button id="dialogue-close">OK</button>
-    </div>
-    
-    <!-- PUZZLE OVERLAY — puzzle interface appears here -->
-    <div id="puzzle-overlay" class="hidden">
-      <div id="puzzle-container"></div>
-    </div>
-    
-    <!-- HINT OVERLAY — Lumie appears here -->
-    <div id="hint-overlay" class="hidden">
-      <div id="hint-box">
-        <p id="hint-text"></p>
-        <button id="hint-close">Got it!</button>
-      </div>
-    </div>
-    
-    <!-- REWARD OVERLAY — badges and key pieces appear here -->
-    <div id="reward-overlay" class="hidden">
-      <div id="reward-box">
-        <p id="reward-text"></p>
-        <button id="reward-close">Brilliant!</button>
-      </div>
-    </div>
-    
-  </div>
-  
-  <!-- ERROR SCREEN -->
-  <div id="error-screen" class="hidden">
-    <h2>⚠️ Oops!</h2>
-    <p>Something didn't load correctly. Please restart the game.</p>
-    <button onclick="location.reload()">Try Again</button>
-  </div>
-  
-  <!-- Service Worker Registration & Orientation Lock -->
+  </section>
+
+  <footer>
+    <p>Made with ♥ for curious minds | <a href="game/" style="color:#FFD700;">Play Now</a></p>
+  </footer>
+
   <script>
-    // -----------------------------------------------
-    // ORIENTATION DETECTION & LOCKING
-    // Detects portrait mode and shows warning
-    // Attempts to lock to landscape on supported devices
-    // -----------------------------------------------
-    
-    function checkOrientation() {
-      const warning = document.getElementById("orientation-warning");
-      const isPortrait = window.innerHeight > window.innerWidth;
-      
-      if (isPortrait) {
-        warning.classList.add("show");
-      } else {
-        warning.classList.remove("show");
-      }
+    function promptInstall() {
+      alert("Open the game page first, then tap the menu (⋯) and choose 'Add to Home screen'.\n\nThis makes Adventopia feel like a real app! ✨");
     }
-    
-    // Check orientation on load and resize
-    window.addEventListener("load", checkOrientation);
-    window.addEventListener("resize", checkOrientation);
-    window.addEventListener("orientationchange", checkOrientation);
-    
-    // Attempt to lock orientation to landscape using Screen Orientation API
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock("landscape").catch(err => {
-        console.log("Orientation lock not supported or denied:", err);
-      });
-    }
-    
-    // -----------------------------------------------
-    // SERVICE WORKER REGISTRATION
-    // Enables offline play and PWA installation
-    // -----------------------------------------------
-    
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js")
-        .then(registration => {
-          console.log("[App] Service Worker registered successfully");
-          
-          // Check for updates periodically
-          setInterval(() => {
-            registration.update();
-          }, 60000); // Check every minute
-        })
-        .catch(err => {
-          console.warn("[App] Service Worker registration failed:", err);
-        });
-      
-      // Handle service worker updates
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        console.log("[App] New Service Worker activated");
-      });
-    }
-    
-    // -----------------------------------------------
-    // PWA INSTALL PROMPT
-    // Allows users to install the app to home screen
-    // -----------------------------------------------
-    
-    let deferredPrompt;
-    
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      console.log("[App] Install prompt available");
-    });
-    
-    window.addEventListener("appinstalled", () => {
-      console.log("[App] PWA installed successfully");
-      deferredPrompt = null;
-    });
   </script>
-  
-  <!-- Scene Art Engine -->
-  <script src="scene-art.js"></script>
-  <!-- Puzzle Logic -->
-  <script src="puzzles.js"></script>
-  <!-- Main Game Script -->
-  <script src="main.js"></script>
-  
 </body>
 </html>
