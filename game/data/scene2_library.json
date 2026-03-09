@@ -1,5 +1,6 @@
 {
   "id": "scene2_library",
+  "backgroundImage": "scene2_library.png",
   "name": "The Library",
   "backgroundColor": "#D7CCC8",
   "music": "audio/music_library.mp3",
@@ -13,6 +14,8 @@
   "objects": [
     {
       "id": "mara_librarian",
+      "image": "mara_librarian.png",
+      "imageType": "characters",
       "label": "Mara the Librarian",
       "x": 55,
       "y": 25,
@@ -24,6 +27,7 @@
     },
     {
       "id": "bookshelves",
+      "image": "bookshelves.png",
       "label": "Bookshelves",
       "x": 5,
       "y": 10,
@@ -34,6 +38,7 @@
     },
     {
       "id": "wall_map",
+      "image": "wall_map.png",
       "label": "Wall Map",
       "x": 70,
       "y": 10,
@@ -44,6 +49,7 @@
     },
     {
       "id": "spiral_staircase",
+      "image": "spiral_staircase.png",
       "label": "Staircase",
       "x": 80,
       "y": 50,

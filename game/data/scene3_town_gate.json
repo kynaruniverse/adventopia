@@ -1,5 +1,6 @@
 {
   "id": "scene3_town_gate",
+  "backgroundImage": "scene3_town_gate.png",
   "name": "The Town Gate",
   "backgroundColor": "#FFE0B2",
   "music": "audio/music_gate.mp3",
@@ -13,6 +14,8 @@
   "objects": [
     {
       "id": "gus_gatekeeper",
+      "image": "gus_gatekeeper.png",
+      "imageType": "characters",
       "label": "Gus the Gatekeeper",
       "x": 15,
       "y": 25,
@@ -24,6 +27,7 @@
     },
     {
       "id": "gate_panel",
+      "image": "gate_panel.png",
       "label": "Gate Panel",
       "x": 40,
       "y": 20,
@@ -35,6 +39,7 @@
     },
     {
       "id": "signpost",
+      "image": "signpost.png",
       "label": "Signpost",
       "x": 72,
       "y": 35,
@@ -45,6 +50,7 @@
     },
     {
       "id": "ivy_walls",
+      "image": "ivy_walls.png",
       "label": "Ivy",
       "x": 2,
       "y": 5,

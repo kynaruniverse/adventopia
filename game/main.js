@@ -3,7 +3,6 @@
    The core game engine
    ============================================= */
 
-
 // -----------------------------------------------
 // 1. GAME STATE
 // Tracks everything about the current session
@@ -23,6 +22,7 @@ const gameState = {
   navArrows: []
 };
 
+let pendingPuzzle = null;
 
 // -----------------------------------------------
 // 2. ELEMENT REFERENCES
@@ -53,18 +53,17 @@ const elements = {
 
 const ctx = elements.canvas.getContext('2d');
 
-
 // -----------------------------------------------
 // 3. UTILITY FUNCTIONS
 // Small helpers used throughout the game
 // -----------------------------------------------
 
 function show(el) {
-  el.classList.remove('hidden');
+  if (el) el.classList.remove('hidden');
 }
 
 function hide(el) {
-  el.classList.add('hidden');
+  if (el) el.classList.add('hidden');
 }
 
 function showError() {
@@ -72,7 +71,6 @@ function showError() {
   hide(elements.gameContainer);
   show(elements.errorScreen);
 }
-
 
 // -----------------------------------------------
 // 4. SAVE & LOAD
@@ -120,7 +118,6 @@ function clearProgress() {
   localStorage.removeItem('adventopia_save');
 }
 
-
 // -----------------------------------------------
 // 5. CANVAS SETUP
 // Sizes the canvas to fill the scene area
@@ -128,8 +125,10 @@ function clearProgress() {
 
 function resizeCanvas() {
   const sceneArea = document.getElementById('scene-area');
-  elements.canvas.width  = sceneArea.offsetWidth;
-  elements.canvas.height = sceneArea.offsetHeight;
+  if (sceneArea && elements.canvas) {
+    elements.canvas.width  = sceneArea.offsetWidth;
+    elements.canvas.height = sceneArea.offsetHeight;
+  }
 }
 
 // -----------------------------------------------
@@ -164,39 +163,35 @@ async function loadScene(sceneId) {
     gameState.currentScene = sceneId;
     renderScene(sceneData);
 
-    // Start scene music if available
     if (sceneData.music) {
       playSceneMusic(sceneData.music);
     }
 
+    // Auto-save on scene load
     saveProgress();
+    console.log(`[Game] Scene loaded and progress saved: ${sceneId}`);
   } catch (err) {
     console.error('Scene load error:', err);
     showError();
   }
 }
 
-
 // -----------------------------------------------
 // 7. SCENE RENDERER
 // Draws the scene background and objects
 // -----------------------------------------------
 
-// Store current scene data so resize can re-render
 let activeSceneData = null;
 
 function renderScene(sceneData) {
   resizeCanvas();
   activeSceneData = sceneData;
 
-  // Draw background + objects (no hover)
   renderSceneBackground(sceneData);
   renderSceneObjects(sceneData, -1, -1);
 
-  // Set up click + hover detection
   setupSceneClicks(sceneData);
 
-  // Show entry dialogue if first visit
   if (sceneData.entryDialogue) {
     const visitKey = `visited_${sceneData.id}`;
     if (!sessionStorage.getItem(visitKey)) {
@@ -207,16 +202,13 @@ function renderScene(sceneData) {
 }
 
 function renderSceneBackground(sceneData) {
-  // Full illustrated scene via art engine
   drawSceneArt(ctx, sceneData, elements.canvas.width, elements.canvas.height);
 }
 
 function renderSceneObjects(sceneData, hoverX, hoverY) {
-  // Repaint full scene art
   drawSceneArt(ctx, sceneData, elements.canvas.width, elements.canvas.height);
 
-  // Overlay hover glow + tooltip on the hovered object
-  if (sceneData.objects && hoverX >= 0) {
+  if (sceneData.objects) {
     sceneData.objects.forEach(obj => {
       const x = (obj.x / 100) * elements.canvas.width;
       const y = (obj.y / 100) * elements.canvas.height;
@@ -226,9 +218,7 @@ function renderSceneObjects(sceneData, hoverX, hoverY) {
         hoverX >= x && hoverX <= x + w &&
         hoverY >= y && hoverY <= y + h
       );
-      if (isHovered) {
-        drawObjectArt(ctx, obj, elements.canvas.width, elements.canvas.height, true);
-      }
+      drawObjectArt(ctx, obj, elements.canvas.width, elements.canvas.height, isHovered);
     });
   }
 
@@ -244,10 +234,8 @@ function drawNavigationArrows(sceneData) {
   const cw = elements.canvas.width;
   const ch = elements.canvas.height;
 
-  // Store arrow hit zones for click detection
   gameState.navArrows = [];
 
-  // Left arrow — go to previous scene
   if (sceneData.previousScene) {
     drawArrow('left', 20, ch / 2, sceneData.previousScene);
     gameState.navArrows.push({
@@ -260,7 +248,6 @@ function drawNavigationArrows(sceneData) {
     });
   }
 
-  // Right arrow — go to next scene
   if (sceneData.nextScene) {
     const isLocked = isSceneLocked(sceneData.nextScene);
     drawArrow('right', cw - 20, ch / 2, sceneData.nextScene, isLocked);
@@ -297,7 +284,6 @@ function drawArrow(direction, x, y, targetScene, locked = false) {
   ctx.fill();
   ctx.stroke();
 
-  // Lock icon if locked
   if (locked) {
     ctx.fillStyle = '#666666';
     ctx.font = 'bold 16px Arial';
@@ -307,211 +293,77 @@ function drawArrow(direction, x, y, targetScene, locked = false) {
 
   ctx.restore();
 }
-// -----------------------------------------------
-// 8. PLACEHOLDER OBJECT DRAWING
-// Draws simple coloured boxes for objects
-// until real art assets are ready
-// -----------------------------------------------
-
-
-function drawPlaceholderObject(obj, isHovered = false) {
-  const x = (obj.x / 100) * elements.canvas.width;
-  const y = (obj.y / 100) * elements.canvas.height;
-  const w = (obj.w / 100) * elements.canvas.width;
-  const h = (obj.h / 100) * elements.canvas.height;
-
-  ctx.save();
-
-  // Glow / lift effect on hover
-  if (isHovered) {
-    ctx.shadowColor  = '#ffffff';
-    ctx.shadowBlur   = 18;
-    ctx.globalAlpha  = 1;
-  }
-
-  ctx.fillStyle   = obj.color || '#FFD700';
-  ctx.strokeStyle = isHovered ? '#ffffff' : '#333';
-  ctx.lineWidth   = isHovered ? 3 : 2;
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, 8);
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.restore();
-
-  // Label
-  ctx.fillStyle = '#333';
-  ctx.font      = `${isHovered ? 'bold' : 'bold'} 13px Arial`;
-  ctx.textAlign = 'center';
-  ctx.fillText(obj.label || obj.id, x + w / 2, y + h / 2 + 5);
-
-  // Tap indicator for touch users
-  if (isHovered) {
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    ctx.font      = '11px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('tap to interact', x + w / 2, y + h - 6);
-  }
-}
-
 
 // -----------------------------------------------
-// 9. CLICK DETECTION
-// Handles what happens when a player taps
-// an object in the scene
+// 9. SCENE INTERACTION
+// Handles clicks and hovers on scene objects
 // -----------------------------------------------
 
 function setupSceneClicks(sceneData) {
+  elements.canvas.onclick = (event) => handleCanvasClick(event, sceneData);
+  elements.canvas.onmousemove = (event) => handleCanvasHover(event, sceneData);
+}
 
-  // HOVER — highlight objects under the cursor
-  elements.canvas.onmousemove = function(e) {
-    const rect   = elements.canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+function handleCanvasClick(event, sceneData) {
+  const rect = elements.canvas.getBoundingClientRect();
+  const scaleX = elements.canvas.width / rect.width;
+  const scaleY = elements.canvas.height / rect.height;
+  const clickX = (event.clientX - rect.left) * scaleX;
+  const clickY = (event.clientY - rect.top) * scaleY;
 
-    let overObject = false;
-
-    // Check nav arrows
-    if (gameState.navArrows) {
-      for (const arrow of gameState.navArrows) {
-        if (
-          mouseX >= arrow.x && mouseX <= arrow.x + arrow.w &&
-          mouseY >= arrow.y && mouseY <= arrow.y + arrow.h
-        ) {
-          overObject = true;
-          break;
-        }
+  for (const arrow of gameState.navArrows) {
+    if (clickX >= arrow.x && clickX <= arrow.x + arrow.w &&
+        clickY >= arrow.y && clickY <= arrow.y + arrow.h) {
+      if (!arrow.locked) {
+        transitionToScene(arrow.targetScene);
+        playSFX('sfx_click');
+        return;
+      } else {
+        showDialogue('This path is currently locked. You need to find all three key pieces to proceed!');
+        playSFX('sfx_wrong');
+        return;
       }
     }
+  }
 
-    // Check scene objects
-    if (!overObject && sceneData.objects) {
-      for (const obj of sceneData.objects) {
-        const x = (obj.x / 100) * elements.canvas.width;
-        const y = (obj.y / 100) * elements.canvas.height;
-        const w = (obj.w / 100) * elements.canvas.width;
-        const h = (obj.h / 100) * elements.canvas.height;
-        if (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) {
-          overObject = true;
-          break;
-        }
-      }
-    }
-
-    elements.canvas.style.cursor = overObject ? 'pointer' : 'default';
-
-    // Redraw scene with hover highlight
-    renderSceneObjects(sceneData, mouseX, mouseY);
-  };
-
-  elements.canvas.onmouseleave = function() {
-    elements.canvas.style.cursor = 'default';
-    renderSceneObjects(sceneData, -1, -1);
-  };
-
-  // CLICK
-  elements.canvas.onclick = function(e) {
-    const rect   = elements.canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    // Check navigation arrows first
-    if (gameState.navArrows) {
-      for (const arrow of gameState.navArrows) {
-        if (
-          mouseX >= arrow.x && mouseX <= arrow.x + arrow.w &&
-          mouseY >= arrow.y && mouseY <= arrow.y + arrow.h
-        ) {
-          attemptSceneNavigation(arrow.targetScene);
-          return;
-        }
-      }
-    }
-
-    // Check scene objects
-    if (!sceneData.objects) return;
-
-    sceneData.objects.forEach(obj => {
+  if (sceneData.objects) {
+    for (const obj of sceneData.objects) {
       const x = (obj.x / 100) * elements.canvas.width;
       const y = (obj.y / 100) * elements.canvas.height;
       const w = (obj.w / 100) * elements.canvas.width;
       const h = (obj.h / 100) * elements.canvas.height;
 
-      if (
-        mouseX >= x && mouseX <= x + w &&
-        mouseY >= y && mouseY <= y + h
-      ) {
+      if (clickX >= x && clickX <= x + w &&
+          clickY >= y && clickY <= y + h) {
         handleObjectClick(obj);
+        playSFX('sfx_click');
+        return;
       }
-    });
-  };
-}
-
-// -----------------------------------------------
-// SCENE LOCK CHECKING
-// Checks if a scene is locked based on
-// key pieces collected
-// -----------------------------------------------
-
-function isSceneLocked(sceneId) {
-  // Fetch scene data from already loaded cache
-  // For now check against known unlock requirements
-  const unlockMap = {
-    'scene2_library':   'key_piece_1',
-    'scene3_town_gate': 'key_piece_2'
-  };
-
-  const requiredKey = unlockMap[sceneId];
-  if (!requiredKey) return false;
-
-  return !gameState.collectedKeyPieces.includes(requiredKey);
-}
-
-function attemptSceneNavigation(targetSceneId) {
-  if (isSceneLocked(targetSceneId)) {
-    showDialogue(
-      "This area is locked for now. " +
-      "Solve the puzzle here first to earn a key piece!"
-    );
-    return;
+    }
   }
-  transitionToScene(targetSceneId);
 }
 
+function handleCanvasHover(event, sceneData) {
+  const rect = elements.canvas.getBoundingClientRect();
+  const scaleX = elements.canvas.width / rect.width;
+  const scaleY = elements.canvas.height / rect.height;
+  const hoverX = (event.clientX - rect.left) * scaleX;
+  const hoverY = (event.clientY - rect.top) * scaleY;
 
-// Pending puzzle to trigger after dialogue is dismissed
-let pendingPuzzle = null;
+  renderSceneObjects(sceneData, hoverX, hoverY);
+}
 
 function handleObjectClick(obj) {
-  playSFX('sfx_click');
-  // Special case — gate panel
-  if (obj.id === 'gate_panel') {
-    const patternSolved = gameState.solvedPuzzles.includes('puzzle3_gate_pattern_pattern');
-    if (patternSolved) {
-      triggerPuzzle('puzzle3_gate_pattern');
-    } else {
-      showDialogue(
-        'The gate is locked. Find Gus the Gatekeeper and ' +
-        'complete the puzzle to earn your third key and unlock the gate!'
-      );
-    }
-    return;
-  }
-
-  // If the object has both dialogue AND a puzzle:
-  // show dialogue first, then trigger puzzle when player clicks OK
   if (obj.dialogue && obj.puzzle) {
     pendingPuzzle = obj.puzzle;
     showDialogue(obj.dialogue);
     return;
   }
 
-  // Dialogue only
   if (obj.dialogue) {
     showDialogue(obj.dialogue);
   }
 
-  // Puzzle only (no dialogue)
   if (obj.puzzle) {
     triggerPuzzle(obj.puzzle);
   }
@@ -521,6 +373,12 @@ function handleObjectClick(obj) {
   }
 }
 
+function isSceneLocked(sceneId) {
+  if (sceneId === 'scene3_town_gate') {
+    return gameState.collectedKeyPieces.length < 3;
+  }
+  return false;
+}
 
 // -----------------------------------------------
 // 10. DIALOGUE SYSTEM
@@ -536,7 +394,6 @@ function showDialogue(text) {
 elements.dialogueClose.addEventListener('click', () => {
   hide(elements.dialogueBox);
 
-  // If an NPC triggered a puzzle after their dialogue, launch it now
   if (pendingPuzzle) {
     const puzzleToLoad = pendingPuzzle;
     pendingPuzzle = null;
@@ -544,14 +401,12 @@ elements.dialogueClose.addEventListener('click', () => {
   }
 });
 
-
 // -----------------------------------------------
 // 11. PUZZLE SYSTEM
 // Triggers and manages puzzles
 // -----------------------------------------------
 
 function triggerPuzzle(puzzleId) {
-  // Puzzle 3 can always be re-opened to insert key pieces
   const isGatePattern = puzzleId === 'puzzle3_gate_pattern';
   if (gameState.solvedPuzzles.includes(puzzleId) && !isGatePattern) {
     showDialogue("You have already solved this one — great work!");
@@ -580,7 +435,6 @@ function renderPuzzle(puzzleData) {
   elements.puzzleContainer.innerHTML = '';
   show(elements.puzzleOverlay);
 
-  // Route to correct puzzle type
   if (puzzleData.type === 'matching_sort') {
     renderBreadSortPuzzle(puzzleData);
   } else if (puzzleData.type === 'sequencing') {
@@ -589,18 +443,9 @@ function renderPuzzle(puzzleData) {
     renderGatePatternPuzzle(puzzleData);
   } else {
     elements.puzzleContainer.innerHTML = `
-      <h2 style="color:#2C5F8A; margin-bottom:12px;">
-        ${puzzleData.name}
-      </h2>
-      <p style="color:#555; margin-bottom:20px;">
-        ${puzzleData.description}
-      </p>
-      <button onclick="closePuzzle()"
-        style="margin-top:20px; background:#2C5F8A; color:white;
-               border:none; border-radius:20px; padding:8px 24px;
-               cursor:pointer;">
-        Close
-      </button>
+      <h2 style="color:#2C5F8A; margin-bottom:12px;">${puzzleData.name}</h2>
+      <p style="color:#555; margin-bottom:20px;">${puzzleData.description}</p>
+      <button onclick="closePuzzle()" style="margin-top:20px; background:#2C5F8A; color:white; border:none; border-radius:20px; padding:8px 24px; cursor:pointer;">Close</button>
     `;
   }
 }
@@ -608,10 +453,13 @@ function renderPuzzle(puzzleData) {
 function closePuzzle() {
   hide(elements.puzzleOverlay);
   elements.puzzleContainer.innerHTML = '';
+  gameState.activePuzzle = null;
 }
 
 function puzzleSolved(puzzleId, reward) {
-  gameState.solvedPuzzles.push(puzzleId);
+  if (!gameState.solvedPuzzles.includes(puzzleId)) {
+    gameState.solvedPuzzles.push(puzzleId);
+  }
   gameState.puzzleAttempts[puzzleId] = 0;
   gameState.activePuzzle = null;
   saveProgress();
@@ -628,7 +476,6 @@ function puzzleFailed(puzzleId, failureMessage) {
   }
   gameState.puzzleAttempts[puzzleId]++;
 
-  // Show failure message
   const failMsg = document.getElementById('puzzle-fail-msg');
   if (failMsg) {
     failMsg.textContent = failureMessage || 'Not quite — give it another go!';
@@ -636,23 +483,15 @@ function puzzleFailed(puzzleId, failureMessage) {
     setTimeout(() => { failMsg.style.display = 'none'; }, 2500);
   }
 
-  // Auto show hint after 2 failed attempts
-  if (
-    gameState.puzzleAttempts[puzzleId] >= 2 &&
-    gameState.activePuzzle &&
-    gameState.activePuzzle.hints
-  ) {
+  if (gameState.puzzleAttempts[puzzleId] >= 2 && gameState.activePuzzle && gameState.activePuzzle.hints) {
     setTimeout(() => {
       showHint(puzzleId, gameState.activePuzzle.hints);
     }, 800);
   }
 }
 
-
 // -----------------------------------------------
 // 12. HINT SYSTEM
-// Lumie's hints — shown on request or after
-// 2 incorrect attempts
 // -----------------------------------------------
 
 function showHint(puzzleId, hints) {
@@ -666,8 +505,7 @@ function showHint(puzzleId, hints) {
     elements.hintText.textContent = hints[index];
     gameState.hintIndex[puzzleId]++;
   } else {
-    elements.hintText.textContent =
-      "You're doing great — keep trying, you'll get it!";
+    elements.hintText.textContent = "You're doing great — keep trying, you'll get it!";
   }
 
   playSFX('sfx_hint');
@@ -679,23 +517,18 @@ elements.hintClose.addEventListener('click', () => {
 });
 
 elements.hintBtn.addEventListener('click', () => {
-  // If a puzzle is open and has hints — use those
   if (gameState.activePuzzle && gameState.activePuzzle.hints) {
     showHint(gameState.activePuzzle.id, gameState.activePuzzle.hints);
     return;
   }
-  // Otherwise give a general exploration hint
   if (gameState.currentScene) {
-    elements.hintText.textContent =
-      'Look around the scene — click on characters and objects to explore. Find someone who needs help!';
+    elements.hintText.textContent = 'Look around the scene — click on characters and objects to explore. Find someone who needs help!';
     show(elements.hintOverlay);
   }
 });
 
-
 // -----------------------------------------------
 // 13. INVENTORY SYSTEM
-// Collects and displays items in the HUD bar
 // -----------------------------------------------
 
 function collectItem(item) {
@@ -730,10 +563,8 @@ function updateInventoryDisplay() {
   });
 }
 
-
 // -----------------------------------------------
 // 14. REWARD SYSTEM
-// Shows badges, key pieces, and positive messages
 // -----------------------------------------------
 
 function showReward(reward) {
@@ -741,14 +572,14 @@ function showReward(reward) {
   show(elements.rewardOverlay);
   playSFX('sfx_reward');
 
-  if (reward.keyPiece) {
+  if (reward.keyPiece && !gameState.collectedKeyPieces.includes(reward.keyPiece)) {
     gameState.collectedKeyPieces.push(reward.keyPiece);
     saveProgress();
     updateInventoryDisplay();
     playSFX('sfx_key_collect');
   }
 
-  if (reward.badge) {
+  if (reward.badge && !gameState.achievements.includes(reward.badge)) {
     gameState.achievements.push(reward.badge);
     saveProgress();
   }
@@ -762,40 +593,27 @@ elements.rewardClose.addEventListener('click', () => {
   }
 });
 
-
 // -----------------------------------------------
 // 15. WORLD COMPLETION CHECK
-// Checks if all 3 key pieces are collected
 // -----------------------------------------------
 
 function checkWorldComplete() {
   if (gameState.collectedKeyPieces.length >= 3) {
-    showDialogue(
-      "You collected all 3 golden key pieces! " +
-      "The Town Gate is now unlocked. Amazing work, Pip!"
-    );
+    showDialogue("You collected all 3 golden key pieces! The Town Gate is now unlocked. Amazing work, Pip!");
   }
 }
 
-
 // -----------------------------------------------
 // 16. AUDIO ENGINE
-// Background music + sound effects
-// Fully toggleable, scene-aware
 // -----------------------------------------------
 
 const audioEngine = {
   bgMusic:    null,
   currentSrc: null,
   enabled:    true,
-  sfxPool:    {}       // cache for reuse
+  sfxPool:    {}
 };
 
-// -----------------------------------------------
-// PLAY SFX
-// Plays a one-shot sound effect by name
-// Respects the master audio toggle
-// -----------------------------------------------
 function playSFX(name) {
   if (!audioEngine.enabled) return;
   try {
@@ -808,22 +626,16 @@ function playSFX(name) {
 
 function playSceneMusic(src) {
   if (!src) return;
-
-  // Already playing the same track — don't restart
   if (audioEngine.currentSrc === src && audioEngine.bgMusic && !audioEngine.bgMusic.paused) {
     return;
   }
-
   stopMusic();
-
-  audioEngine.bgMusic         = new Audio(src);
-  audioEngine.bgMusic.loop    = true;
-  audioEngine.bgMusic.volume  = 0.38;
-  audioEngine.currentSrc      = src;
-
+  audioEngine.bgMusic = new Audio(src);
+  audioEngine.bgMusic.loop = true;
+  audioEngine.bgMusic.volume = 0.38;
+  audioEngine.currentSrc = src;
   if (audioEngine.enabled) {
     audioEngine.bgMusic.play().catch(() => {
-      // Autoplay blocked — wait for first user gesture
       document.addEventListener('click', function resumeAudio() {
         if (audioEngine.enabled && audioEngine.bgMusic) {
           audioEngine.bgMusic.play().catch(() => {});
@@ -847,28 +659,19 @@ elements.audioBtn.addEventListener('click', () => {
   audioEngine.enabled = !audioEngine.enabled;
   gameState.audioEnabled = audioEngine.enabled;
   elements.audioBtn.textContent = audioEngine.enabled ? '🔊 Audio' : '🔇 Audio';
-
   if (audioEngine.enabled) {
-    if (audioEngine.bgMusic) {
-      audioEngine.bgMusic.play().catch(() => {});
-    }
+    if (audioEngine.bgMusic) audioEngine.bgMusic.play().catch(() => {});
   } else {
-    if (audioEngine.bgMusic) {
-      audioEngine.bgMusic.pause();
-    }
+    if (audioEngine.bgMusic) audioEngine.bgMusic.pause();
   }
 });
 
-
-// ----// -----------------------------------------------
-// 17. ORIENTATION DETECTION & LOCKING
-// Detects portrait mode and shows warning
-// Attempts to lock to landscape on supported devices
+// -----------------------------------------------
+// 17. ORIENTATION DETECTION
 // -----------------------------------------------
 
 function checkOrientation() {
   const isPortrait = window.innerHeight > window.innerWidth;
-  
   if (isPortrait) {
     show(elements.orientationWarning);
   } else {
@@ -878,19 +681,17 @@ function checkOrientation() {
 
 // -----------------------------------------------
 // 18. GAME INIT
-// Starts the game — called when page loads
 // -----------------------------------------------
+
 async function initGame() {
   try {
-    checkOrientation(); // Initial check
+    checkOrientation();
     resizeCanvas();
     loadProgress();
     updateInventoryDisplay();
-    // Short delay to show loading screen
     await new Promise(resolve => setTimeout(resolve, 1200));
     hide(elements.loadingScreen);
     show(elements.gameContainer);
-    // Load first scene or last saved scene
     const startScene = gameState.currentScene || 'scene1_village_square';
     await loadScene(startScene);
     gameState.gameStarted = true;
@@ -900,23 +701,20 @@ async function initGame() {
   }
 }
 
-// Handle window resize and orientation change — re-render the active scene and check orientation
 window.addEventListener('resize', () => {
   checkOrientation();
   if (gameState.gameStarted && activeSceneData) {
     resizeCanvas();
     renderSceneObjects(activeSceneData, -1, -1);
-    setupSceneClicks(activeSceneData);
   }
 });
+
 window.addEventListener('orientationchange', checkOrientation);
 
-// Attempt to lock orientation to landscape using Screen Orientation API
 if (screen.orientation && screen.orientation.lock) {
   screen.orientation.lock('landscape').catch(err => {
     console.log('Orientation lock not supported or denied:', err);
   });
 }
 
-// Start the game
-initGame();;
+initGame();
