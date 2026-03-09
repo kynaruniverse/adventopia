@@ -4,7 +4,7 @@
   "description": "Adventopia — Explore, Learn, Play. A story-driven educational adventure game.",
   "start_url": "/adventopia/",
   "scope": "/adventopia/",
-  "display": "fullscreen",
+  "display": "standalone",
   "orientation": "landscape",
   "background_color": "#1a1a2e",
   "theme_color": "#2C5F8A",

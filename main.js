@@ -47,7 +47,8 @@ const elements = {
   rewardText:      document.getElementById('reward-text'),
   rewardClose:     document.getElementById('reward-close'),
   hintBtn:         document.getElementById('hint-btn'),
-  audioBtn:        document.getElementById('audio-btn')
+  audioBtn:        document.getElementById("audio-btn"),
+  orientationWarning: document.getElementById("orientation-warning")
 };
 
 const ctx = elements.canvas.getContext('2d');
@@ -859,43 +860,63 @@ elements.audioBtn.addEventListener('click', () => {
 });
 
 
-// -----------------------------------------------
-// 17. GAME INIT
-// Starts the game — called when page loads
+// ----// -----------------------------------------------
+// 17. ORIENTATION DETECTION & LOCKING
+// Detects portrait mode and shows warning
+// Attempts to lock to landscape on supported devices
 // -----------------------------------------------
 
+function checkOrientation() {
+  const isPortrait = window.innerHeight > window.innerWidth;
+  
+  if (isPortrait) {
+    show(elements.orientationWarning);
+  } else {
+    hide(elements.orientationWarning);
+  }
+}
+
+// -----------------------------------------------
+// 18. GAME INIT
+// Starts the game — called when page loads
+// -----------------------------------------------
 async function initGame() {
   try {
+    checkOrientation(); // Initial check
     resizeCanvas();
     loadProgress();
     updateInventoryDisplay();
-
     // Short delay to show loading screen
     await new Promise(resolve => setTimeout(resolve, 1200));
-
     hide(elements.loadingScreen);
     show(elements.gameContainer);
-
     // Load first scene or last saved scene
     const startScene = gameState.currentScene || 'scene1_village_square';
     await loadScene(startScene);
-
     gameState.gameStarted = true;
-
   } catch (err) {
     console.error('Game init failed:', err);
     showError();
   }
 }
 
-// Handle window resize — re-render the active scene
+// Handle window resize and orientation change — re-render the active scene and check orientation
 window.addEventListener('resize', () => {
+  checkOrientation();
   if (gameState.gameStarted && activeSceneData) {
     resizeCanvas();
     renderSceneObjects(activeSceneData, -1, -1);
     setupSceneClicks(activeSceneData);
   }
 });
+window.addEventListener('orientationchange', checkOrientation);
+
+// Attempt to lock orientation to landscape using Screen Orientation API
+if (screen.orientation && screen.orientation.lock) {
+  screen.orientation.lock('landscape').catch(err => {
+    console.log('Orientation lock not supported or denied:', err);
+  });
+}
 
 // Start the game
-initGame();
+initGame();;

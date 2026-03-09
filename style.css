@@ -1,8 +1,8 @@
 /* =============================================
-   ADVENTOPIA — Main Stylesheet
+   ADVENTOPIA — Landscape-Only Responsive CSS
+   Optimized for mobile, tablet, and desktop
    ============================================= */
 
-/* --- RESET & BASE --- */
 * {
   margin: 0;
   padding: 0;
@@ -12,19 +12,64 @@
 html, body {
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #1a1a2e;
+  color: #333;
+  overflow: hidden;
+  /* Force landscape orientation */
+  orientation: landscape;
 }
 
-/* --- LOADING SCREEN --- */
+/* -----------------------------------------------
+   ORIENTATION LOCK WARNING
+   Shows if user tries to use portrait mode
+   ----------------------------------------------- */
+
+#orientation-warning {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #1a1a2e;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: white;
+  text-align: center;
+  padding: 24px;
+}
+
+#orientation-warning.show {
+  display: flex;
+}
+
+#orientation-warning h2 {
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+  color: #ffb347;
+}
+
+#orientation-warning p {
+  font-size: 1rem;
+  opacity: 0.9;
+  max-width: 300px;
+  line-height: 1.6;
+}
+
+/* -----------------------------------------------
+   LOADING SCREEN
+   ----------------------------------------------- */
+
 #loading-screen {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #2C5F8A, #3A7DC9);
+  background: linear-gradient(135deg, #1a1a2e 0%, #2C5F8A 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -36,27 +81,27 @@ html, body {
 
 #loading-screen h1 {
   font-size: 3rem;
-  font-weight: bold;
-  letter-spacing: 4px;
-  margin-bottom: 16px;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  margin-bottom: 12px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
 #loading-screen p {
   font-size: 1.1rem;
   opacity: 0.85;
+  animation: pulse 1.5s infinite;
 }
 
-/* --- UTILITY --- */
-.hidden {
-  display: none !important;
+@keyframes pulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 0.5; }
 }
 
-/* --- GAME CONTAINER --- */
+/* -----------------------------------------------
+   GAME CONTAINER
+   Main game layout with HUD and scene
+   ----------------------------------------------- */
+
 #game-container {
-  position: fixed;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   display: flex;
@@ -64,7 +109,18 @@ html, body {
   background-color: #1a1a2e;
 }
 
-/* --- HUD --- */
+#game-container.hidden,
+#loading-screen.hidden,
+#error-screen.hidden,
+#orientation-warning.hidden {
+  display: none !important;
+}
+
+/* -----------------------------------------------
+   HUD (Heads-Up Display)
+   Top bar with inventory and control buttons
+   ----------------------------------------------- */
+
 #hud {
   width: 100%;
   height: 60px;
@@ -75,6 +131,7 @@ html, body {
   padding: 0 16px;
   z-index: 100;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  flex-shrink: 0;
 }
 
 #inventory-bar {
@@ -82,6 +139,22 @@ html, body {
   align-items: center;
   gap: 8px;
   flex: 1;
+  overflow-x: auto;
+  max-width: calc(100% - 180px);
+}
+
+#inventory-bar::-webkit-scrollbar {
+  height: 4px;
+}
+
+#inventory-bar::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+}
+
+#inventory-bar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
 }
 
 .inventory-slot {
@@ -94,11 +167,20 @@ html, body {
   align-items: center;
   justify-content: center;
   font-size: 1.4rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.inventory-slot:hover {
+  background-color: rgba(255,255,255,0.25);
+  transform: scale(1.05);
 }
 
 #hud-buttons {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 #hud-buttons button {
@@ -110,14 +192,21 @@ html, body {
   font-size: 0.85rem;
   cursor: pointer;
   transition: background-color 0.2s;
+  white-space: nowrap;
+  user-select: none;
 }
 
 #hud-buttons button:hover,
 #hud-buttons button:active {
   background-color: rgba(255,255,255,0.35);
+  transform: scale(1.05);
 }
 
-/* --- SCENE AREA --- */
+/* -----------------------------------------------
+   SCENE AREA
+   Main game canvas and interactive area
+   ----------------------------------------------- */
+
 #scene-area {
   flex: 1;
   position: relative;
@@ -125,15 +214,23 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #0f0f1e;
 }
 
 #game-canvas {
   width: 100%;
   height: 100%;
   display: block;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+  touch-action: none;
 }
 
-/* --- DIALOGUE BOX --- */
+/* -----------------------------------------------
+   DIALOGUE BOX
+   NPC dialogue and story text
+   ----------------------------------------------- */
+
 #dialogue-box {
   position: absolute;
   bottom: 20px;
@@ -147,6 +244,18 @@ html, body {
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   z-index: 200;
   text-align: center;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 #dialogue-text {
@@ -165,6 +274,7 @@ html, body {
   font-size: 0.95rem;
   cursor: pointer;
   transition: background-color 0.2s;
+  user-select: none;
 }
 
 #dialogue-close:hover,
@@ -172,7 +282,11 @@ html, body {
   background-color: #3A7DC9;
 }
 
-/* --- PUZZLE OVERLAY --- */
+/* -----------------------------------------------
+   PUZZLE OVERLAY
+   Puzzle interface container
+   ----------------------------------------------- */
+
 #puzzle-overlay {
   position: fixed;
   top: 0;
@@ -184,6 +298,12 @@ html, body {
   align-items: center;
   justify-content: center;
   z-index: 300;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 #puzzle-container {
@@ -198,7 +318,29 @@ html, body {
   text-align: center;
 }
 
-/* --- HINT OVERLAY --- */
+#puzzle-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+#puzzle-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+#puzzle-container::-webkit-scrollbar-thumb {
+  background: #2C5F8A;
+  border-radius: 4px;
+}
+
+#puzzle-container::-webkit-scrollbar-thumb:hover {
+  background: #3A7DC9;
+}
+
+/* -----------------------------------------------
+   HINT OVERLAY
+   Lumie the hint character
+   ----------------------------------------------- */
+
 #hint-overlay {
   position: fixed;
   top: 0;
@@ -210,6 +352,7 @@ html, body {
   align-items: center;
   justify-content: center;
   z-index: 400;
+  animation: fadeIn 0.2s ease-out;
 }
 
 #hint-box {
@@ -221,6 +364,21 @@ html, body {
   max-width: 460px;
   text-align: center;
   box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+  animation: bounceIn 0.4s ease-out;
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 #hint-text {
@@ -240,6 +398,7 @@ html, body {
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.2s;
+  user-select: none;
 }
 
 #hint-close:hover,
@@ -247,7 +406,11 @@ html, body {
   background-color: #e0b030;
 }
 
-/* --- REWARD OVERLAY --- */
+/* -----------------------------------------------
+   REWARD OVERLAY
+   Badges and key pieces celebration
+   ----------------------------------------------- */
+
 #reward-overlay {
   position: fixed;
   top: 0;
@@ -259,6 +422,7 @@ html, body {
   align-items: center;
   justify-content: center;
   z-index: 400;
+  animation: fadeIn 0.2s ease-out;
 }
 
 #reward-box {
@@ -270,6 +434,7 @@ html, body {
   max-width: 460px;
   text-align: center;
   box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+  animation: bounceIn 0.4s ease-out;
 }
 
 #reward-text {
@@ -290,6 +455,7 @@ html, body {
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.2s;
+  user-select: none;
 }
 
 #reward-close:hover,
@@ -297,7 +463,10 @@ html, body {
   background-color: #388e3c;
 }
 
-/* --- ERROR SCREEN --- */
+/* -----------------------------------------------
+   ERROR SCREEN
+   ----------------------------------------------- */
+
 #error-screen {
   position: fixed;
   top: 0;
@@ -337,14 +506,20 @@ html, body {
   padding: 10px 32px;
   font-size: 1rem;
   cursor: pointer;
+  user-select: none;
 }
 
-/* --- RESPONSIVE --- */
-@media (max-width: 480px) {
-  #loading-screen h1 {
-    font-size: 2.2rem;
-  }
+#error-screen button:hover {
+  background-color: #4a8dd9;
+}
 
+/* -----------------------------------------------
+   RESPONSIVE DESIGN
+   Landscape-optimized breakpoints
+   ----------------------------------------------- */
+
+/* Mobile Landscape (320px - 767px width) */
+@media (max-width: 767px) {
   #hud {
     height: 52px;
     padding: 0 10px;
@@ -353,9 +528,152 @@ html, body {
   .inventory-slot {
     width: 38px;
     height: 38px;
+    font-size: 1.2rem;
+  }
+
+  #hud-buttons button {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+
+  #dialogue-box {
+    width: 85%;
+    max-width: 500px;
+    padding: 16px 20px;
+    bottom: 12px;
+  }
+
+  #dialogue-text {
+    font-size: 0.95rem;
   }
 
   #puzzle-container {
+    width: 95%;
+    max-width: 480px;
     padding: 20px 16px;
+    max-height: 80vh;
+  }
+
+  #hint-box,
+  #reward-box {
+    width: 90%;
+    max-width: 420px;
+    padding: 20px;
+  }
+
+  #hint-text,
+  #reward-text {
+    font-size: 0.95rem;
+  }
+}
+
+/* Tablet Landscape (768px - 1024px width) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  #hud {
+    height: 64px;
+    padding: 0 20px;
+  }
+
+  .inventory-slot {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+  }
+
+  #hud-buttons button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+
+  #dialogue-box {
+    width: 80%;
+    max-width: 650px;
+    padding: 22px 28px;
+  }
+
+  #puzzle-container {
+    width: 85%;
+    max-width: 600px;
+    padding: 32px;
+    max-height: 82vh;
+  }
+
+  #hint-box,
+  #reward-box {
+    width: 80%;
+    max-width: 500px;
+    padding: 28px;
+  }
+}
+
+/* Desktop Landscape (1025px and above) */
+@media (min-width: 1025px) {
+  #hud {
+    height: 70px;
+    padding: 0 24px;
+  }
+
+  .inventory-slot {
+    width: 52px;
+    height: 52px;
+    font-size: 1.6rem;
+  }
+
+  #hud-buttons button {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+
+  #dialogue-box {
+    width: 75%;
+    max-width: 700px;
+    padding: 24px 32px;
+  }
+
+  #puzzle-container {
+    width: 80%;
+    max-width: 700px;
+    padding: 36px;
+    max-height: 85vh;
+  }
+
+  #hint-box,
+  #reward-box {
+    width: 75%;
+    max-width: 550px;
+    padding: 32px;
+  }
+
+  #hint-text,
+  #reward-text {
+    font-size: 1.1rem;
+  }
+}
+
+/* -----------------------------------------------
+   TOUCH OPTIMIZATION
+   For mobile and tablet devices
+   ----------------------------------------------- */
+
+@media (hover: none) and (pointer: coarse) {
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .inventory-slot {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* -----------------------------------------------
+   HIGH DPI SCREENS
+   Retina and 4K displays
+   ----------------------------------------------- */
+
+@media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  #game-canvas {
+    image-rendering: -webkit-optimize-contrast;
   }
 }
