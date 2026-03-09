@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2C5F8A" />
+  <meta name="description" content="Adventopia — Explore, Learn, Play. A story-driven educational adventure game." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Adventopia" />
+  
+  <title>Adventopia</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+  
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  
+  <!-- ORIENTATION WARNING
+       Shows if user is in portrait mode on mobile/tablet -->
+  <div id="orientation-warning">
+    <h2>📱 Please Rotate Your Device</h2>
+    <p>Adventopia is best played in landscape mode for the full experience. Please rotate your device to landscape.</p>
+    <button onclick="this.parentElement.classList.remove('show')" style="margin-top:30px; padding:12px 30px; font-size:1.1rem; background:#FFD700; color:#1e3a8a; border:none; border-radius:30px; cursor:pointer; font-weight:bold;">
+      I'll rotate later
+    </button>
+  </div>
+  
+  <!-- LOADING SCREEN -->
+  <div id="loading-screen">
+    <h1>🗺️ Adventopia</h1>
+    <p>Loading your adventure...</p>
+  </div>
+  
+  <!-- GAME CONTAINER -->
+  <div id="game-container" class="hidden">
+    
+    <!-- HUD — top bar with inventory and buttons -->
+    <div id="hud">
+      <div id="inventory-bar"></div>
+      <div id="hud-buttons">
+        <button id="hint-btn" title="Get a hint">💡 Hint</button>
+        <button id="audio-btn" title="Toggle audio">🔊 Audio</button>
+        <button id="install-btn" style="display:none; background:#4CAF50; color:white; border:none; border-radius:8px; padding:8px 16px; font-size:0.9rem; cursor:pointer;">
+          📱 Install
+        </button>
+      </div>
+    </div>
+    
+    <!-- SCENE AREA — where backgrounds and objects appear -->
+    <div id="scene-area">
+      <canvas id="game-canvas"></canvas>
+    </div>
+    
+    <!-- DIALOGUE BOX — for NPC speech and story text -->
+    <div id="dialogue-box" class="hidden">
+      <p id="dialogue-text"></p>
+      <button id="dialogue-close">OK</button>
+    </div>
+    
+    <!-- PUZZLE OVERLAY — puzzle interface appears here -->
+    <div id="puzzle-overlay" class="hidden">
+      <div id="puzzle-container"></div>
+    </div>
+    
+    <!-- HINT OVERLAY — Lumie appears here -->
+    <div id="hint-overlay" class="hidden">
+      <div id="hint-box">
+        <p id="hint-text"></p>
+        <button id="hint-close">Got it!</button>
+      </div>
+    </div>
+    
+    <!-- REWARD OVERLAY — badges and key pieces appear here -->
+    <div id="reward-overlay" class="hidden">
+      <div id="reward-box">
+        <p id="reward-text"></p>
+        <button id="reward-close">Brilliant!</button>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- ERROR SCREEN -->
+  <div id="error-screen" class="hidden">
+    <h2>⚠️ Oops!</h2>
+    <p>Something didn't load correctly. Please restart the game.</p>
+    <button onclick="location.reload()">Try Again</button>
+  </div>
+  
+  <!-- Service Worker Registration & Orientation Lock -->
+  <script>
+    // -----------------------------------------------
+    // ORIENTATION DETECTION & LOCKING
+    // Detects portrait mode and shows warning
+    // Attempts to lock to landscape on supported devices
+    // -----------------------------------------------
+    
+    function checkOrientation() {
+      const warning = document.getElementById("orientation-warning");
+      const isPortrait = window.innerHeight > window.innerWidth;
+      
+      if (isPortrait) {
+        warning.classList.add("show");
+      } else {
+        warning.classList.remove("show");
+      }
+    }
+    
+    // Check orientation on load and resize
+    window.addEventListener("load", checkOrientation);
+    window.addEventListener("resize", checkOrientation);
+    window.addEventListener("orientationchange", checkOrientation);
+    
+    // Attempt to lock orientation to landscape using Screen Orientation API
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock("landscape").catch(err => {
+        console.log("Orientation lock not supported or denied:", err);
+      });
+    }
+    
+    // -----------------------------------------------
+    // SERVICE WORKER REGISTRATION
+    // Enables offline play and PWA installation
+    // -----------------------------------------------
+    
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js")
+        .then(registration => {
+          console.log("[App] Service Worker registered successfully");
+          
+          // Check for updates periodically
+          setInterval(() => {
+            registration.update();
+          }, 60000); // Check every minute
+        })
+        .catch(err => {
+          console.warn("[App] Service Worker registration failed:", err);
+        });
+      
+      // Handle service worker updates
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        console.log("[App] New Service Worker activated");
+      });
+    }
+    
+    // -----------------------------------------------
+    // PWA INSTALL PROMPT
+    // Allows users to install the app to home screen
+    // -----------------------------------------------
+    
+    let deferredPrompt;
+    
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      console.log("[App] Install prompt available");
+    });
+    
+    window.addEventListener("appinstalled", () => {
+      console.log("[App] PWA installed successfully");
+      deferredPrompt = null;
+    });
+  </script>
+  
+  <!-- Scene Art Engine -->
+  <script src="scene-art.js"></script>
+  <!-- Puzzle Logic -->
+  <script src="puzzles.js"></script>
+  <!-- Main Game Script -->
+  <script src="main.js"></script>
+  <script>
+    let deferredPrompt;
+  
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById("install-btn").style.display = "inline-block";
+    });
+  
+    document.getElementById("install-btn")?.addEventListener("click", async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log("Install outcome:", outcome);
+        if (outcome === "accepted") {
+          document.getElementById("install-btn").style.display = "none";
+        }
+        deferredPrompt = null;
+      }
+    });
+  
+    window.addEventListener("appinstalled", () => {
+      console.log("PWA installed!");
+    });
+  </script>
+</body>
+</html>

@@ -677,3 +677,21 @@ html, body {
     image-rendering: -webkit-optimize-contrast;
   }
 }
+
+#orientation-warning {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26,26,46,0.97);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: white;
+  text-align: center;
+  padding: 30px;
+}
+
+#orientation-warning.show {
+  display: flex;
+}
