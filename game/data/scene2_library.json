@@ -3,7 +3,7 @@
   "backgroundImage": "scene2_library.png",
   "name": "The Library",
   "backgroundColor": "#D7CCC8",
-  "music": "audio/music_library.mp3",
+  "music": "assetsaudio/music_library.mp3",
   "unlockRequirement": {
     "type": "keyPiece",
     "id": "key_piece_1"
@@ -11,6 +11,7 @@
   "entryDialogue": "This is the village library. Mara the Librarian needs your help — it looks like something has made a mess in here!",
   "previousScene": "scene1_village_square",
   "nextScene": "scene3_town_gate",
+  "nextSceneLock": { "type": "keyPieces", "required": 3 },
   "objects": [
     {
       "id": "mara_librarian",

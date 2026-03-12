@@ -4,31 +4,37 @@
    Now optimized for PNG art integration
    ============================================= */
 
-/**
- * Draws the background for a scene.
- * If a background image exists, it draws it.
- * Otherwise, it draws a placeholder with the scene's background color.
- */
+// Image cache — images are loaded once and reused.
+// Prevents new Image() being created on every draw call.
+const imageCache = {};
+
+function getImage(src, onLoad, onError) {
+  if (imageCache[src]) return imageCache[src];
+  const img = new Image();
+  imageCache[src] = img;
+  img.onload = () => { if (onLoad) onLoad(img); };
+  img.onerror = () => {
+    img._error = true;
+    console.warn(`[Asset] Failed to load: ${src}`);
+    if (onError) onError();
+  };
+  img.src = src;
+  return img;
+}
+
 function drawSceneArt(ctx, sceneData, width, height) {
-  // 1. Clear the canvas
   ctx.clearRect(0, 0, width, height);
 
-  // 2. Draw Background
   if (sceneData.backgroundImage) {
-    const bgImg = new Image();
-    bgImg.src = `assets/backgrounds/${sceneData.backgroundImage}`;
-    if (bgImg.complete) {
-      ctx.drawImage(bgImg, 0, 0, width, height);
+    const src = `assets/backgrounds/${sceneData.backgroundImage}`;
+    const img = getImage(
+      src,
+      () => { if (gameState.currentScene === sceneData.id) renderSceneObjects(sceneData, -1, -1); },
+      () => { if (gameState.currentScene === sceneData.id) renderSceneObjects(sceneData, -1, -1); }
+    );
+    if (img.complete && !img._error) {
+      ctx.drawImage(img, 0, 0, width, height);
     } else {
-      bgImg.onload = () => {
-        // Re-render when loaded if it's still the active scene
-        if (gameState.currentScene === sceneData.id) {
-          ctx.drawImage(bgImg, 0, 0, width, height);
-          // Re-draw objects on top
-          renderSceneObjects(sceneData, -1, -1);
-        }
-      };
-      // Fallback while loading
       drawBackgroundPlaceholder(ctx, sceneData, width, height);
     }
   } else {
@@ -68,23 +74,14 @@ function drawObjectArt(ctx, obj, canvasWidth, canvasHeight, isHovered = false) {
   }
   // 2. Draw the Image or Placeholder
   if (obj.image) {
-    const img = new Image();
-    img.src = `assets/${obj.imageType || 'objects'}/${obj.image}`;
-    
-    // Improved error handling for missing images
-    img.onerror = () => {
-      console.warn(`[Asset] Failed to load image: ${img.src}. Using placeholder.`);
-      obj._imageError = true;
-      if (activeSceneData) renderSceneObjects(activeSceneData, -1, -1);
-    };
-
-    if (img.complete && !obj._imageError) {
+    const src = `assets/${obj.imageType || 'objects'}/${obj.image}`;
+    const img = getImage(
+      src,
+      () => { if (activeSceneData) renderSceneObjects(activeSceneData, -1, -1); },
+      () => { obj._imageError = true; if (activeSceneData) renderSceneObjects(activeSceneData, -1, -1); }
+    );
+    if (img.complete && !img._error && !obj._imageError) {
       ctx.drawImage(img, x, y, w, h);
-    } else if (!obj._imageError) {
-      img.onload = () => {
-        if (activeSceneData) renderSceneObjects(activeSceneData, -1, -1);
-      };
-      drawPlaceholderBox(ctx, obj, x, y, w, h, isHovered);
     } else {
       drawPlaceholderBox(ctx, obj, x, y, w, h, isHovered);
     }

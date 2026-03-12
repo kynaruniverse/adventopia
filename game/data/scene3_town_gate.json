@@ -3,7 +3,7 @@
   "backgroundImage": "scene3_town_gate.png",
   "name": "The Town Gate",
   "backgroundColor": "#FFE0B2",
-  "music": "audio/music_gate.mp3",
+  "music": "assets/audio/music_gate.mp3",
   "unlockRequirement": {
     "type": "keyPiece",
     "id": "key_piece_2"

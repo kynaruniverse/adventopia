@@ -298,6 +298,7 @@ function drawArrow(direction, x, y, targetScene, locked = false) {
 // 9. SCENE INTERACTION
 // Handles clicks and hovers on scene objects
 // -----------------------------------------------
+let hoverRafId = null;
 
 function setupSceneClicks(sceneData) {
   elements.canvas.onclick = (event) => handleCanvasClick(event, sceneData);
@@ -344,13 +345,16 @@ function handleCanvasClick(event, sceneData) {
 }
 
 function handleCanvasHover(event, sceneData) {
-  const rect = elements.canvas.getBoundingClientRect();
-  const scaleX = elements.canvas.width / rect.width;
-  const scaleY = elements.canvas.height / rect.height;
-  const hoverX = (event.clientX - rect.left) * scaleX;
-  const hoverY = (event.clientY - rect.top) * scaleY;
-
-  renderSceneObjects(sceneData, hoverX, hoverY);
+  if (hoverRafId) cancelAnimationFrame(hoverRafId);
+  hoverRafId = requestAnimationFrame(() => {
+    hoverRafId = null;
+    const rect = elements.canvas.getBoundingClientRect();
+    const scaleX = elements.canvas.width / rect.width;
+    const scaleY = elements.canvas.height / rect.height;
+    const hoverX = (event.clientX - rect.left) * scaleX;
+    const hoverY = (event.clientY - rect.top) * scaleY;
+    renderSceneObjects(sceneData, hoverX, hoverY);
+  });
 }
 
 function handleObjectClick(obj) {
@@ -374,9 +378,16 @@ function handleObjectClick(obj) {
 }
 
 function isSceneLocked(sceneId) {
-  if (sceneId === 'scene3_town_gate') {
-    return gameState.collectedKeyPieces.length < 3;
+  // Read lock requirements from the active scene's JSON.
+  // Add "nextSceneLock": { "type": "keyPieces", "required": 3 }
+  // to any scene JSON to lock its next scene without touching this file.
+  if (activeSceneData && activeSceneData.nextScene === sceneId && activeSceneData.nextSceneLock) {
+    const lock = activeSceneData.nextSceneLock;
+    if (lock.type === 'keyPieces') return gameState.collectedKeyPieces.length < lock.required;
+    if (lock.type === 'puzzle') return !gameState.solvedPuzzles.includes(lock.id);
   }
+  // Legacy fallback — keeps World 1 working while JSON is updated
+  if (sceneId === 'scene3_town_gate') return gameState.collectedKeyPieces.length < 3;
   return false;
 }
 
@@ -558,7 +569,11 @@ function updateInventoryDisplay() {
     const slot = document.createElement('div');
     slot.className = 'inventory-slot';
     slot.title = pieceId;
-    slot.textContent = '🔑';
+    const keyImg = document.createElement('img');
+    keyImg.src = 'assets/icons/key_piece.png';
+    keyImg.alt = 'Key piece';
+    keyImg.style.cssText = 'width:28px; height:28px; object-fit:contain;';
+    slot.appendChild(keyImg);
     elements.inventoryBar.appendChild(slot);
   });
 }
@@ -569,6 +584,20 @@ function updateInventoryDisplay() {
 
 function showReward(reward) {
   elements.rewardText.textContent = reward.text || 'Well done!';
+  
+  // Show badge image if this reward includes a badge
+  const existingBadgeImg = document.getElementById('reward-badge-img');
+  if (existingBadgeImg) existingBadgeImg.remove();
+  if (reward.badge) {
+    const badgeFilename = 'badge_' + reward.badge.toLowerCase().replace(/ /g, '_') + '.png';
+    const badgeImg = document.createElement('img');
+    badgeImg.id = 'reward-badge-img';
+    badgeImg.src = 'assets/badges/' + badgeFilename;
+    badgeImg.alt = reward.badge + ' badge';
+    badgeImg.style.cssText = 'width:140px; height:140px; margin: 0 auto 12px; display:block;';
+    elements.rewardText.insertAdjacentElement('beforebegin', badgeImg);
+  }
+  
   show(elements.rewardOverlay);
   playSFX('sfx_reward');
 

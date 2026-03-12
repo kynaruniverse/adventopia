@@ -150,23 +150,7 @@
       });
     }
     
-    // -----------------------------------------------
-    // PWA INSTALL PROMPT
-    // Allows users to install the app to home screen
-    // -----------------------------------------------
-    
-    let deferredPrompt;
-    
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      console.log("[App] Install prompt available");
-    });
-    
-    window.addEventListener("appinstalled", () => {
-      console.log("[App] PWA installed successfully");
-      deferredPrompt = null;
-    });
+
   </script>
   
   <!-- Scene Art Engine -->
@@ -176,28 +160,32 @@
   <!-- Main Game Script -->
   <script src="main.js"></script>
   <script>
-    let deferredPrompt;
-  
+    let deferredPrompt = null;
+
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      document.getElementById("install-btn").style.display = "inline-block";
+      console.log("[App] Install prompt available");
+      const btn = document.getElementById("install-btn");
+      if (btn) btn.style.display = "inline-block";
     });
-  
+
     document.getElementById("install-btn")?.addEventListener("click", async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log("Install outcome:", outcome);
-        if (outcome === "accepted") {
-          document.getElementById("install-btn").style.display = "none";
-        }
-        deferredPrompt = null;
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log("[App] Install outcome:", outcome);
+      if (outcome === "accepted") {
+        document.getElementById("install-btn").style.display = "none";
       }
+      deferredPrompt = null;
     });
-  
+
     window.addEventListener("appinstalled", () => {
-      console.log("PWA installed!");
+      console.log("[App] PWA installed successfully");
+      deferredPrompt = null;
+      const btn = document.getElementById("install-btn");
+      if (btn) btn.style.display = "none";
     });
   </script>
 </body>

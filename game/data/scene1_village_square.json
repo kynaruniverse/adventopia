@@ -3,7 +3,7 @@
   "backgroundImage": "scene1_village_square.png",
   "name": "Village Square",
   "backgroundColor": "#87CEEB",
-  "music": "audio/music_village.mp3",
+  "music": "assets/audio/music_village.mp3",
   "unlockRequirement": null,
   "entryDialogue": "Welcome to the Learning Village, Pip! The villagers need your help. Speak to Benny the Baker — he looks a little flustered!",
   "previousScene": null,

@@ -4,7 +4,7 @@
    ============================================= */
 
 
-const CACHE_NAME = 'adventopia-v5';
+const CACHE_NAME = 'adventopia-v6';
 
 const CORE_FILES = [
   "/game/",
@@ -111,7 +111,7 @@ self.addEventListener('fetch', event => {
             // If both cache and network fail
             // show a friendly offline message for HTML requests
             if (event.request.destination === 'document') {
-              return caches.match('/adventopia/index.html');
+              return caches.match('/game/index.html');
             }
           });
       })

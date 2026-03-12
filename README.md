@@ -61,29 +61,39 @@ The game now works **offline** and is **landscape-only** for the best visuals an
 
 ```
 adventopia/
-├── index.html              # Main entry point
-├── style.css               # All styles
-├── main.js                 # Core game engine
-├── puzzles.js              # Puzzle rendering and logic
-├── manifest.json           # PWA manifest
-├── service-worker.js       # Offline caching
-├── assets/
-│   ├── backgrounds/        # Scene background images
-│   ├── characters/         # Character sprites
-│   ├── objects/            # Interactive object images
-│   ├── audio/              # Music and sound effects
-│   └── icons/              # PWA app icons (192 + 512)
-├── data/
-│   ├── world1.json
-│   ├── scene1_village_square.json
-│   ├── scene2_library.json
-│   ├── scene3_town_gate.json
-│   ├── puzzle1_bread_sort.json
-│   ├── puzzle2_story_pages.json
-│   └── puzzle3_gate_pattern.json
-├── scenes/                 # Reserved for future scene modules
-└── puzzles/                # Reserved for future puzzle modules
-```
+├── index.html              # Landing page
+├── og_image.png            # Social share image
+├── favicon.ico             # Browser tab icon
+├── README.md
+├── game/
+│   ├── index.html          # Game shell
+│   ├── main.js             # Core game engine
+│   ├── puzzles.js          # Puzzle rendering and logic
+│   ├── scene-art.js        # Canvas drawing engine
+│   ├── style.css           # All game styles
+│   ├── manifest.json       # PWA manifest
+│   ├── service-worker.js   # Offline caching
+│   ├── assets/
+│   │   ├── backgrounds/    # Scene background PNGs
+│   │   ├── characters/     # Character sprite PNGs
+│   │   ├── objects/        # Interactive object PNGs
+│   │   ├── badges/         # Badge award PNGs
+│   │   ├── icons/          # PWA icons + HUD icons
+│   │   └── audio/          # Music and sound effects
+│   └── data/
+│       ├── world1.json
+│       ├── scene1_village_square.json
+│       ├── scene2_library.json
+│       ├── scene3_town_gate.json
+│       ├── puzzle1_bread_sort.json
+│       ├── puzzle2_story_pages.json
+│       └── puzzle3_gate_pattern.json
+└── printables/
+    ├── coloring-pip.html
+    ├── coloring-shell.html
+    ├── bread-sort-worksheet.html
+    ├── badges-print.html
+    └── pdf/
 
 ---
 
