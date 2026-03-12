@@ -47,6 +47,7 @@
       <div id="hud-buttons">
         <button id="hint-btn" title="Get a hint">💡 Hint</button>
         <button id="audio-btn" title="Toggle audio">🔊 Audio</button>
+        <button id="reset-btn" title="Reset save data" onclick="if(confirm('Reset all progress and start fresh?')){localStorage.removeItem('adventopia_save');location.reload();}">🔄 Reset</button>
         <button id="install-btn" style="display:none; background:#4CAF50; color:white; border:none; border-radius:8px; padding:8px 16px; font-size:0.9rem; cursor:pointer;">
           📱 Install
         </button>
