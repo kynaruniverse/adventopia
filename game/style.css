@@ -112,7 +112,11 @@ html, body {
 #game-container.hidden,
 #loading-screen.hidden,
 #error-screen.hidden,
-#orientation-warning.hidden {
+#orientation-warning.hidden,
+#reward-overlay.hidden,
+#hint-overlay.hidden,
+#dialogue-box.hidden,
+#puzzle-overlay.hidden {
   display: none !important;
 }
 
@@ -232,6 +236,7 @@ html, body {
    ----------------------------------------------- */
 
 #dialogue-box {
+  display: none;
   position: absolute;
   bottom: 20px;
   left: 50%;
@@ -288,13 +293,13 @@ html, body {
    ----------------------------------------------- */
 
 #puzzle-overlay {
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background-color: rgba(0,0,0,0.6);
-  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 300;
@@ -342,13 +347,13 @@ html, body {
    ----------------------------------------------- */
 
 #hint-overlay {
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background-color: rgba(0,0,0,0.5);
-  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 400;
@@ -412,13 +417,13 @@ html, body {
    ----------------------------------------------- */
 
 #reward-overlay {
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background-color: rgba(0,0,0,0.55);
-  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 400;
