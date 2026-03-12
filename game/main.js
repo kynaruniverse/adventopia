@@ -58,12 +58,26 @@ const ctx = elements.canvas.getContext('2d');
 // Small helpers used throughout the game
 // -----------------------------------------------
 
+const FLEX_ELEMENTS = new Set([
+  'reward-overlay',
+  'hint-overlay',
+  'puzzle-overlay',
+  'dialogue-box',
+  'error-screen'
+]);
+
 function show(el) {
-  if (el) el.classList.remove('hidden');
+  if (!el) return;
+  el.classList.remove('hidden');
+  if (FLEX_ELEMENTS.has(el.id)) {
+    el.style.display = 'flex';
+  }
 }
 
 function hide(el) {
-  if (el) el.classList.add('hidden');
+  if (!el) return;
+  el.style.display = '';
+  el.classList.add('hidden');
 }
 
 function showError() {
@@ -354,6 +368,33 @@ function handleCanvasHover(event, sceneData) {
     const hoverX = (event.clientX - rect.left) * scaleX;
     const hoverY = (event.clientY - rect.top) * scaleY;
     renderSceneObjects(sceneData, hoverX, hoverY);
+
+    // Change cursor to pointer when over a clickable object or arrow
+    let isOverClickable = false;
+
+    for (const arrow of gameState.navArrows) {
+      if (hoverX >= arrow.x && hoverX <= arrow.x + arrow.w &&
+          hoverY >= arrow.y && hoverY <= arrow.y + arrow.h) {
+        isOverClickable = true;
+        break;
+      }
+    }
+
+    if (!isOverClickable && sceneData.objects) {
+      for (const obj of sceneData.objects) {
+        const x = (obj.x / 100) * elements.canvas.width;
+        const y = (obj.y / 100) * elements.canvas.height;
+        const w = (obj.w / 100) * elements.canvas.width;
+        const h = (obj.h / 100) * elements.canvas.height;
+        if (hoverX >= x && hoverX <= x + w &&
+            hoverY >= y && hoverY <= y + h) {
+          isOverClickable = true;
+          break;
+        }
+      }
+    }
+
+    elements.canvas.style.cursor = isOverClickable ? 'pointer' : 'default';
   });
 }
 
