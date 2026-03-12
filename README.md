@@ -3,7 +3,7 @@
 ## 🚀 How to Play (2026 Version)
 
 **Install as PWA** for the best experience:
-1. Open [your-site.com](https://your-site.com)
+1. Open [your-site.com](https://kynaruniverse.github.io/adventopia)
 2. Tap the big **PLAY ADVENTOPIA** button
 3. Tap the **📱 Install on Home Screen** button
 4. Launch from your home screen — full-screen landscape adventure!

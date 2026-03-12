@@ -2,46 +2,100 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Pip the Explorer - Coloring Page | Adventopia</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pip Colouring Page | Adventopia</title>
   <style>
-    body { font-family:Arial,sans-serif; text-align:center; background:#f9f9f9; padding:20px; }
-    svg { max-width:90%; height:auto; border:2px solid #ccc; background:white; }
-    h1 { color:#2C5F8A; }
-    @media print { body { margin:0; background:white; } svg { border:none; } }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #1e3a8a);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      color: white;
+    }
+    .header { text-align:center; margin-bottom:24px; }
+    .header h1 { font-size:2rem; color:#FFD700; margin-bottom:8px; }
+    .header p { opacity:0.85; font-size:1rem; }
+    .preview {
+      background: white;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      max-width: 600px;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+    .preview img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 6px;
+    }
+    .buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .btn {
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-print {
+      background: #FFD700;
+      color: #1a237e;
+    }
+    .btn-download {
+      background: #4CAF50;
+      color: white;
+    }
+    .back {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size:0.9rem;
+    }
+    .back:hover { color: #FFD700; }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      .header, .buttons, .back { display: none; }
+      .preview {
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+        border-radius: 0;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>🧒 Color Pip the Explorer!</h1>
-  <p>Print and color Pip's backpack, scarf, and adventurous outfit!</p>
-  
-  <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
-    <!-- Head -->
-    <circle cx="100" cy="80" r="25" fill="none" stroke="#333" stroke-width="3"/>
-    <!-- Hair -->
-    <path d="M80 70 Q100 50 120 70" fill="none" stroke="#333" stroke-width="3"/>
-    <!-- Eyes -->
-    <circle cx="90" cy="78" r="5" fill="white" stroke="#333" stroke-width="2"/>
-    <circle cx="110" cy="78" r="5" fill="white" stroke="#333" stroke-width="2"/>
-    <!-- Smile -->
-    <path d="M85 95 Q100 105 115 95" fill="none" stroke="#333" stroke-width="3"/>
-    <!-- Body / Shirt -->
-    <rect x="70" y="105" width="60" height="80" rx="10" fill="none" stroke="#333" stroke-width="3"/>
-    <!-- Scarf -->
-    <rect x="75" y="130" width="50" height="15" fill="none" stroke="#FF4500" stroke-width="4"/>
-    <!-- Backpack -->
-    <rect x="80" y="110" width="40" height="60" rx="5" fill="none" stroke="#8B4513" stroke-width="3"/>
-    <!-- Arms / Legs (simple) -->
-    <line x1="70" y1="130" x2="50" y2="170" stroke="#333" stroke-width="4"/>
-    <line x1="130" y1="130" x2="150" y2="170" stroke="#333" stroke-width="4"/>
-    <rect x="75" y="185" width="20" height="40" rx="5" fill="none" stroke="#333" stroke-width="3"/>
-    <rect x="105" y="185" width="20" height="40" rx="5" fill="none" stroke="#333" stroke-width="3"/>
-    <!-- Shoes -->
-    <ellipse cx="85" cy="235" rx="15" ry="8" fill="none" stroke="#333" stroke-width="3"/>
-    <ellipse cx="115" cy="235" rx="15" ry="8" fill="none" stroke="#333" stroke-width="3"/>
-    <!-- Label -->
-    <text x="100" y="280" font-size="24" text-anchor="middle" fill="#2C5F8A">Pip</text>
-  </svg>
-  
-  <p style="margin-top:30px;">Adventopia | Print & Color!</p>
+  <div class="header">
+    <h1>🧒 Pip the Explorer — Colouring Page</h1>
+    <p>Print and colour Pip's adventurous outfit!</p>
+  </div>
+
+  <div class="preview">
+    <img src="coloring-pip.png" alt="Pip the Explorer colouring page">
+  </div>
+
+  <div class="buttons">
+    <button class="btn btn-print" onclick="window.print()">🖨️ Print Now</button>
+    <a class="btn btn-download" href="pdf/adventopia_coloring_pip.pdf" download>⬇️ Download PDF</a>
+  </div>
+
+  <a class="back" href="../index.html">← Back to Adventopia</a>
 </body>
 </html>

@@ -2,40 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Shell the Tortoise - Coloring Page | Adventopia</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shell the Tortoise — Colouring Page | Adventopia</title>
   <style>
-    body { font-family:Arial,sans-serif; text-align:center; background:#f9f9f9; padding:20px; }
-    svg { max-width:90%; height:auto; border:2px solid #ccc; background:white; }
-    h1 { color:#4CAF50; }
-    @media print { body { margin:0; background:white; } svg { border:none; } }
+    /* identical styles as above — copy paste */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',Arial,sans-serif; background:linear-gradient(135deg,#1a1a2e,#1e3a8a); min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:30px 20px; color:white; }
+    .header { text-align:center; margin-bottom:24px; }
+    .header h1 { font-size:2rem; color:#FFD700; margin-bottom:8px; }
+    .header p { opacity:0.85; font-size:1rem; }
+    .preview { background:white; border-radius:12px; padding:12px; box-shadow:0 8px 32px rgba(0,0,0,0.4); max-width:600px; width:100%; margin-bottom:24px; }
+    .preview img { width:100%; height:auto; display:block; border-radius:6px; }
+    .buttons { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-bottom:24px; }
+    .btn { padding:14px 32px; border-radius:50px; font-size:1rem; font-weight:bold; cursor:pointer; border:none; text-decoration:none; display:inline-block; }
+    .btn-print { background:#FFD700; color:#1a237e; }
+    .btn-download { background:#4CAF50; color:white; }
+    .back { color:rgba(255,255,255,0.6); text-decoration:none; font-size:0.9rem; }
+    .back:hover { color:#FFD700; }
+    @media print { body { background:white; padding:0; } .header,.buttons,.back { display:none; } .preview { box-shadow:none; padding:0; max-width:100%; border-radius:0; } }
   </style>
 </head>
 <body>
-  <h1>🐢 Color Shell the Tortoise!</h1>
-  <p>Print and color Shell's shell patterns and happy face!</p>
-  
-  <svg viewBox="0 0 220 280" xmlns="http://www.w3.org/2000/svg">
-    <!-- Shell -->
-    <ellipse cx="110" cy="100" rx="90" ry="70" fill="none" stroke="#333" stroke-width="4"/>
-    <!-- Shell patterns -->
-    <path d="M50 80 Q110 40 170 80" fill="none" stroke="#333" stroke-width="3" stroke-dasharray="5,5"/>
-    <circle cx="110" cy="100" r="30" fill="none" stroke="#333" stroke-width="3"/>
-    <!-- Body -->
-    <ellipse cx="110" cy="140" rx="100" ry="50" fill="none" stroke="#333" stroke-width="3"/>
-    <!-- Head -->
-    <circle cx="170" cy="110" r="30" fill="none" stroke="#333" stroke-width="3"/>
-    <!-- Eye -->
-    <circle cx="180" cy="100" r="8" fill="white" stroke="#333" stroke-width="2"/>
-    <circle cx="182" cy="100" r="3" fill="black"/>
-    <!-- Legs -->
-    <ellipse cx="60" cy="170" rx="20" ry="30" fill="none" stroke="#333" stroke-width="3"/>
-    <ellipse cx="160" cy="170" rx="20" ry="30" fill="none" stroke="#333" stroke-width="3"/>
-    <ellipse cx="80" cy="210" rx="15" ry="10" fill="none" stroke="#333" stroke-width="3"/>
-    <ellipse cx="140" cy="210" rx="15" ry="10" fill="none" stroke="#333" stroke-width="3"/>
-    <!-- Label -->
-    <text x="110" y="260" font-size="28" text-anchor="middle" fill="#4CAF50">Shell</text>
-  </svg>
-  
-  <p style="margin-top:30px;">Adventopia | Print & Color!</p>
+  <div class="header">
+    <h1>🐢 Shell the Tortoise — Colouring Page</h1>
+    <p>Print and colour Shell, Pip's loyal companion!</p>
+  </div>
+
+  <div class="preview">
+    <img src="coloring-shell.png" alt="Shell the Tortoise colouring page">
+  </div>
+
+  <div class="buttons">
+    <button class="btn btn-print" onclick="window.print()">🖨️ Print Now</button>
+    <a class="btn btn-download" href="pdf/adventopia_coloring_shell.pdf" download>⬇️ Download PDF</a>
+  </div>
+
+  <a class="back" href="../index.html">← Back to Adventopia</a>
 </body>
 </html>
