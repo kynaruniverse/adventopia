@@ -606,6 +606,15 @@ function showReward(reward) {
     saveProgress();
     updateInventoryDisplay();
     playSFX('sfx_key_collect');
+    // If this was the third and final key piece, queue the unlock message
+    // after the reward overlay is dismissed
+    if (gameState.collectedKeyPieces.length === 3) {
+      const origClose = elements.rewardClose.onclick;
+      elements.rewardClose.addEventListener('click', function onThirdKey() {
+        elements.rewardClose.removeEventListener('click', onThirdKey);
+        setTimeout(() => checkWorldComplete(), 200);
+      });
+    }
   }
 
   if (reward.badge && !gameState.achievements.includes(reward.badge)) {
@@ -616,10 +625,6 @@ function showReward(reward) {
 
 elements.rewardClose.addEventListener('click', () => {
   hide(elements.rewardOverlay);
-
-  if (gameState.collectedKeyPieces.length === 3) {
-    checkWorldComplete();
-  }
 });
 
 // -----------------------------------------------
@@ -714,6 +719,12 @@ function checkOrientation() {
 
 async function initGame() {
   try {
+    // Explicitly hide all overlays before anything loads.
+    // Prevents stale CSS states from showing overlays on startup.
+    hide(elements.rewardOverlay);
+    hide(elements.hintOverlay);
+    hide(elements.dialogueBox);
+    hide(elements.puzzleOverlay);
     checkOrientation();
     resizeCanvas();
     loadProgress();
