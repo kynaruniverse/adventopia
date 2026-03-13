@@ -2,70 +2,774 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Social Share / OG Meta Tags -->
+
+  <!-- SEO & Social -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A magical story-driven adventure game for curious minds. Solve puzzles, collect badges, and explore The Learning Village!" />
   <meta property="og:title" content="Adventopia — Explore. Learn. Play." />
   <meta property="og:description" content="A magical story-driven adventure game for curious minds. Solve puzzles, collect badges, and explore The Learning Village!" />
-  <meta property="og:image" content="https://kynaruniverse.github.io/adventopia/og-image.png" />
+  <meta property="og:image" content="https://kynaruniverse.github.io/adventopia/og_image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://kynaruniverse.github.io/adventopia" />
-
-  <!-- Twitter/X Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Adventopia — Explore. Learn. Play." />
-  <meta name="twitter:description" content="A magical story-driven adventure game for curious minds. Solve puzzles, collect badges, and explore The Learning Village!" />
-  <meta name="twitter:image" content="https://kynaruniverse.github.io/adventopia/og-image.png" />
+  <meta name="twitter:description" content="A magical story-driven adventure game for curious minds." />
+  <meta name="twitter:image" content="https://kynaruniverse.github.io/adventopia/og_image.png" />
+
   <link rel="icon" type="image/png" href="game/assets/icons/icon-192.png" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Adventopia – Magical Learning Adventures</title>
+  <title>Adventopia — Explore. Learn. Play.</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Segoe UI',Arial,sans-serif; background:linear-gradient(135deg,#0f172a,#1e3a8a); color:white; text-align:center; line-height:1.6; }
-    .hero { padding:80px 20px; max-width:800px; margin:0 auto; }
-    h1 { font-size:3.2rem; margin-bottom:16px; text-shadow:0 4px 15px rgba(0,0,0,0.4); }
-    .lead { font-size:1.25rem; opacity:0.95; margin-bottom:40px; }
-    .btn { display:inline-block; padding:18px 50px; margin:10px; background:#FFD700; color:#1e3a8a; border-radius:50px; text-decoration:none; font-weight:bold; font-size:1.5rem; box-shadow:0 10px 25px rgba(255,215,0,0.5); }
-    section { padding:60px 20px; max-width:900px; margin:0 auto; }
-    h2 { font-size:2.2rem; margin-bottom:30px; color:#FFD700; }
-    .gallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:30px; }
-    .card { background:rgba(255,255,255,0.1); border-radius:20px; padding:30px; backdrop-filter:blur(10px); }
-    .printables-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; }
-    .print-link { background:rgba(255,255,255,0.15); padding:20px; border-radius:15px; text-decoration:none; color:white; font-weight:bold; }
-    footer { background:rgba(0,0,0,0.3); padding:30px; font-size:0.9rem; opacity:0.8; }
+    /* ─── TOKENS ─── */
+    :root {
+      --sky:      #f5c842;
+      --sun:      #ff9c1a;
+      --earth:    #3d2b1f;
+      --navy:     #1a237e;
+      --blue:     #2C5F8A;
+      --green:    #4caf50;
+      --cream:    #fff8e7;
+      --gold:     #FFD700;
+      --red:      #e53935;
+      --white:    #ffffff;
+      --r:        20px;          /* base border-radius */
+      --shadow:   0 8px 32px rgba(0,0,0,0.18);
+    }
+
+    /* ─── RESET ─── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--navy);
+      color: var(--earth);
+      overflow-x: hidden;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E🗺️%3C/text%3E%3C/svg%3E") 4 4, auto;
+    }
+
+    /* ─── FLOATING STARS ─── */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,215,0,0.6);
+      animation: twinkle var(--dur, 3s) ease-in-out infinite var(--delay, 0s);
+    }
+    @keyframes twinkle {
+      0%,100% { opacity:0.2; transform:scale(1); }
+      50%      { opacity:1;   transform:scale(1.4); }
+    }
+
+    /* ─── WAVY SECTION DIVIDER ─── */
+    .wave {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      line-height: 0;
+    }
+    .wave svg { display: block; width: 100%; }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      background: rgba(26,35,126,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid rgba(255,215,0,0.2);
+    }
+    .nav-logo {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 1.4rem;
+      color: var(--gold);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+    .nav-play {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 1rem;
+      background: var(--gold);
+      color: var(--navy);
+      padding: 8px 22px;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 12px rgba(255,215,0,0.4);
+    }
+    .nav-play:hover {
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 8px 20px rgba(255,215,0,0.5);
+    }
+
+    /* ─── HERO ─── */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, #ffce3a 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 80% 20%, #ff9c1a44 0%, transparent 60%),
+        linear-gradient(180deg, #1a2080 0%, #0d1240 100%);
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    /* Floating clouds */
+    .cloud {
+      position: absolute;
+      border-radius: 50px;
+      background: rgba(255,255,255,0.08);
+      filter: blur(2px);
+      animation: drift var(--dur, 18s) ease-in-out infinite alternate;
+    }
+    @keyframes drift {
+      from { transform: translateX(-20px) translateY(0); }
+      to   { transform: translateX(20px)  translateY(-10px); }
+    }
+
+    .hero-eyebrow {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+      animation: fadeUp 0.6s ease-out both;
+    }
+
+    .hero-title {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: clamp(3.2rem, 10vw, 7rem);
+      color: var(--white);
+      line-height: 1.05;
+      text-shadow:
+        0 4px 0 rgba(0,0,0,0.25),
+        0 0 60px rgba(255,215,0,0.3);
+      margin-bottom: 8px;
+      animation: fadeUp 0.7s 0.1s ease-out both;
+    }
+
+    .hero-title span {
+      color: var(--gold);
+      display: inline-block;
+      animation: wobble 3s 1.5s ease-in-out infinite;
+    }
+    @keyframes wobble {
+      0%,100% { transform: rotate(-1deg) scale(1);   }
+      50%      { transform: rotate(1deg)  scale(1.04); }
+    }
+
+    .hero-sub {
+      font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+      font-weight: 600;
+      color: rgba(255,255,255,0.88);
+      max-width: 560px;
+      margin: 0 auto 48px;
+      line-height: 1.7;
+      animation: fadeUp 0.7s 0.2s ease-out both;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Fredoka One', sans-serif;
+      font-size: clamp(1.3rem, 3vw, 1.75rem);
+      background: var(--gold);
+      color: var(--navy);
+      padding: 18px 52px;
+      border-radius: 100px;
+      text-decoration: none;
+      box-shadow:
+        0 8px 0 #b8860b,
+        0 12px 30px rgba(255,215,0,0.45);
+      transition: transform 0.15s, box-shadow 0.15s;
+      animation: fadeUp 0.7s 0.35s ease-out both;
+      position: relative;
+      z-index: 2;
+    }
+    .hero-cta:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 0 #b8860b, 0 18px 40px rgba(255,215,0,0.5);
+    }
+    .hero-cta:active {
+      transform: translateY(2px);
+      box-shadow: 0 4px 0 #b8860b, 0 6px 20px rgba(255,215,0,0.3);
+    }
+
+    .hero-badges {
+      display: flex;
+      gap: 16px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 0.7s 0.5s ease-out both;
+    }
+    .hero-badge {
+      background: rgba(255,255,255,0.1);
+      border: 1.5px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(6px);
+      border-radius: 50px;
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(24px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ─── SECTION SHARED ─── */
+    .section {
+      position: relative;
+      z-index: 1;
+      padding: 80px 24px;
+    }
+
+    .section-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .section-sub {
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 48px;
+      opacity: 0.75;
+    }
+
+    /* ─── STORY SECTION ─── */
+    #story {
+      background: var(--cream);
+    }
+    #story .section-title { color: var(--navy); }
+    #story .section-sub   { color: var(--earth); }
+
+    .story-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .story-card {
+      background: white;
+      border-radius: 24px;
+      padding: 32px 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 2px solid transparent;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .story-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      background: var(--accent, var(--gold));
+      border-radius: 24px 24px 0 0;
+    }
+    .story-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--accent, var(--gold));
+      box-shadow: 0 12px 36px rgba(0,0,0,0.12);
+    }
+    .story-card .icon {
+      font-size: 3rem;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .story-card h3 {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 1.4rem;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+    .story-card p {
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: #555;
+    }
+
+    /* ─── CHARACTERS SECTION ─── */
+    #characters {
+      background: linear-gradient(180deg, #0d1240 0%, #1a237e 100%);
+    }
+    #characters .section-title { color: var(--gold); }
+    #characters .section-sub   { color: rgba(255,255,255,0.7); }
+
+    .char-grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .char-card {
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      padding: 28px 22px;
+      width: 180px;
+      text-align: center;
+      backdrop-filter: blur(8px);
+      transition: transform 0.2s, background 0.2s;
+      cursor: default;
+    }
+    .char-card:hover {
+      transform: translateY(-8px) rotate(-1deg);
+      background: rgba(255,255,255,0.13);
+    }
+    .char-card .char-emoji {
+      font-size: 3.5rem;
+      display: block;
+      margin-bottom: 12px;
+      animation: float var(--dur, 3s) ease-in-out infinite var(--delay, 0s);
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0);   }
+      50%      { transform: translateY(-8px); }
+    }
+    .char-card h3 {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 1.15rem;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .char-card p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.5;
+    }
+
+    /* ─── HOW IT WORKS ─── */
+    #how {
+      background: var(--cream);
+    }
+    #how .section-title { color: var(--navy); }
+    #how .section-sub   { color: var(--earth); }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 32px;
+      counter-reset: step;
+    }
+
+    .step {
+      text-align: center;
+      position: relative;
+    }
+    .step-num {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--gold);
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      box-shadow: 0 6px 20px rgba(26,35,126,0.3);
+    }
+    .step h3 {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 1.2rem;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+    .step p {
+      font-size: 0.9rem;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    /* ─── PRINTABLES ─── */
+    #printables {
+      background: linear-gradient(180deg, #1a237e 0%, #0d1240 100%);
+    }
+    #printables .section-title { color: var(--gold); }
+    #printables .section-sub   { color: rgba(255,255,255,0.7); }
+
+    .print-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .print-card {
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 28px 20px;
+      text-align: center;
+      text-decoration: none;
+      color: white;
+      transition: transform 0.2s, background 0.2s;
+      backdrop-filter: blur(8px);
+    }
+    .print-card:hover {
+      transform: translateY(-6px);
+      background: rgba(255,255,255,0.14);
+    }
+    .print-card .print-icon {
+      font-size: 2.8rem;
+      display: block;
+      margin-bottom: 12px;
+    }
+    .print-card span {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 1.05rem;
+      color: var(--gold);
+      display: block;
+      margin-bottom: 6px;
+    }
+    .print-card p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: #060a1f;
+      padding: 40px 24px;
+      text-align: center;
+      color: rgba(255,255,255,0.45);
+      font-size: 0.875rem;
+    }
+    footer a {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    footer a:hover { text-decoration: underline; }
+    .footer-logo {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 1.6rem;
+      color: var(--gold);
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    /* ─── SCROLL REVEAL ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 700px) {
+      nav { padding: 10px 16px; }
+      .nav-logo { font-size: 1.1rem; }
+
+      .story-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .char-card { width: 140px; padding: 20px 14px; }
+      .char-card .char-emoji { font-size: 2.8rem; }
+
+      .section { padding: 56px 16px; }
+
+      .hero-cta { padding: 16px 36px; }
+    }
+
+    @media (max-width: 400px) {
+      .char-grid { gap: 12px; }
+      .char-card { width: 120px; }
+    }
+
+    /* ─── REDUCED MOTION ─── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="hero">
-    <h1>🗺️ Adventopia</h1>
-    <p class="lead">Explore magical worlds, solve puzzles, and learn with Pip & Shell the tortoise!</p>
-    <a href="game/index.html" class="btn">▶️ PLAY THE GAME</a>
+
+  <!-- Floating stars background -->
+  <div class="stars" aria-hidden="true" id="stars"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">🗺️ Adventopia</a>
+    <a href="game/index.html" class="nav-play">▶ Play Free</a>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <!-- Clouds -->
+    <div class="cloud" style="width:220px;height:60px;top:18%;left:5%;--dur:20s"></div>
+    <div class="cloud" style="width:160px;height:44px;top:30%;right:8%;--dur:15s"></div>
+    <div class="cloud" style="width:280px;height:70px;top:60%;left:12%;--dur:22s"></div>
+
+    <p class="hero-eyebrow">✨ A world of wonder awaits</p>
+    <h1 class="hero-title">
+      Adven<span>topia</span>
+    </h1>
+    <p class="hero-sub">
+      Join Pip &amp; Shell on a magical journey through the Learning Village.
+      Solve puzzles, make friends, and discover that learning is the greatest adventure of all.
+    </p>
+
+    <a href="game/index.html" class="hero-cta">
+      ▶ Start Your Adventure
+    </a>
+
+    <div class="hero-badges">
+      <div class="hero-badge">🆓 Completely Free</div>
+      <div class="hero-badge">🧩 3 Puzzles to Solve</div>
+      <div class="hero-badge">🏆 Badges to Earn</div>
+      <div class="hero-badge">📱 Works on Any Device</div>
+    </div>
+  </section>
+
+  <!-- WAVE -->
+  <div class="wave">
+    <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="height:60px">
+      <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#fff8e7"/>
+    </svg>
   </div>
 
-  <section>
-    <h2>Meet Your Friends</h2>
-    <div class="gallery">
-      <div class="card"><h3>🧒 Pip</h3><p>Your brave explorer!</p></div>
-      <div class="card"><h3>🐢 Shell</h3><p>Pip's loyal tortoise friend</p></div>
-      <div class="card"><h3>🍞 Benny</h3><p>The Baker who needs help sorting bread</p></div>
-      <div class="card"><h3>📚 Mara</h3><p>The Librarian with mixed-up story pages</p></div>
-      <div class="card"><h3>🛡️ Gus</h3><p>The Gatekeeper who forgot the pattern</p></div>
+  <!-- STORY / FEATURES -->
+  <section id="story" class="section">
+    <div class="section-inner">
+      <h2 class="section-title reveal">Why kids love Adventopia</h2>
+      <p class="section-sub reveal reveal-delay-1">Built for curious minds of all abilities</p>
+
+      <div class="story-grid">
+        <div class="story-card reveal reveal-delay-1" style="--accent:#FFD700">
+          <span class="icon">🧩</span>
+          <h3>Three Unique Puzzles</h3>
+          <p>Sort Benny's bread, put Mara's story pages back in order, and crack Gus's secret gate pattern. Every puzzle is different and genuinely fun.</p>
+        </div>
+        <div class="story-card reveal reveal-delay-2" style="--accent:#4CAF50">
+          <span class="icon">🏆</span>
+          <h3>Earn Real Badges</h3>
+          <p>Complete each challenge and collect a badge you can print out and keep forever. Super Sorter, Story Keeper, Village Hero — can you earn them all?</p>
+        </div>
+        <div class="story-card reveal reveal-delay-3" style="--accent:#2C5F8A">
+          <span class="icon">💡</span>
+          <h3>Never Gets Stuck</h3>
+          <p>Lumie the hint helper appears whenever things get tricky. No pressure, no failure screen — just gentle encouragement to keep exploring.</p>
+        </div>
+        <div class="story-card reveal reveal-delay-4" style="--accent:#e53935">
+          <span class="icon">📱</span>
+          <h3>Install Like an App</h3>
+          <p>Add Adventopia to your home screen and play offline, any time, on any device. No app store needed. Just one tap and it's there forever.</p>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section>
-    <h2>Free Printables</h2>
-    <div class="printables-grid">
-      <a href="printables/coloring-pip.html" class="print-link" target="_blank">🧒 Pip Coloring Page</a>
-      <a href="printables/coloring-shell.html" class="print-link" target="_blank">🐢 Shell Coloring Page</a>
-      <a href="printables/bread-sort-worksheet.html" class="print-link" target="_blank">🍞 Bread Sort Worksheet</a>
-      <a href="printables/badges-print.html" class="print-link" target="_blank">🏆 Badges to Cut Out</a>
+  <!-- WAVE -->
+  <div class="wave" style="background:var(--cream)">
+    <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="height:60px">
+      <path d="M0,30 C360,0 1080,60 1440,30 L1440,0 L0,0 Z" fill="#0d1240"/>
+    </svg>
+  </div>
+
+  <!-- CHARACTERS -->
+  <section id="characters" class="section">
+    <div class="section-inner">
+      <h2 class="section-title reveal">Meet the villagers</h2>
+      <p class="section-sub reveal reveal-delay-1">Everyone in the Learning Village needs Pip's help</p>
+
+      <div class="char-grid">
+        <div class="char-card reveal" style="--dur:3.2s;--delay:0s">
+          <span class="char-emoji">🧒</span>
+          <h3>Pip</h3>
+          <p>Your brave explorer and hero of the story</p>
+        </div>
+        <div class="char-card reveal reveal-delay-1" style="--dur:2.8s;--delay:0.3s">
+          <span class="char-emoji">🐢</span>
+          <h3>Shell</h3>
+          <p>Pip's loyal tortoise, always by their side</p>
+        </div>
+        <div class="char-card reveal reveal-delay-2" style="--dur:3.5s;--delay:0.6s">
+          <span class="char-emoji">🍞</span>
+          <h3>Benny</h3>
+          <p>The Baker with a very mixed-up bread delivery</p>
+        </div>
+        <div class="char-card reveal reveal-delay-3" style="--dur:3s;--delay:0.9s">
+          <span class="char-emoji">📚</span>
+          <h3>Mara</h3>
+          <p>The Librarian whose story pages went everywhere</p>
+        </div>
+        <div class="char-card reveal reveal-delay-4" style="--dur:2.6s;--delay:1.2s">
+          <span class="char-emoji">🛡️</span>
+          <h3>Gus</h3>
+          <p>The Gatekeeper who forgot his own secret pattern</p>
+        </div>
+      </div>
     </div>
   </section>
 
+  <!-- WAVE -->
+  <div class="wave" style="background:#0d1240">
+    <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="height:60px">
+      <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#fff8e7"/>
+    </svg>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="section">
+    <div class="section-inner">
+      <h2 class="section-title reveal">How it works</h2>
+      <p class="section-sub reveal reveal-delay-1">Three simple steps to adventure</p>
+
+      <div class="steps">
+        <div class="step reveal reveal-delay-1">
+          <div class="step-num">1</div>
+          <h3>Explore the Village</h3>
+          <p>Tap characters and objects in the scene to discover what's happening and who needs help.</p>
+        </div>
+        <div class="step reveal reveal-delay-2">
+          <div class="step-num">2</div>
+          <h3>Solve the Puzzle</h3>
+          <p>Each villager has a unique challenge. Sort, sequence and pattern-match your way to victory!</p>
+        </div>
+        <div class="step reveal reveal-delay-3">
+          <div class="step-num">3</div>
+          <h3>Collect Key Pieces</h3>
+          <p>Every solved puzzle rewards a golden key piece. Collect all three to unlock the Town Gate!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAVE -->
+  <div class="wave" style="background:var(--cream)">
+    <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="height:60px">
+      <path d="M0,30 C360,0 1080,60 1440,30 L1440,0 L0,0 Z" fill="#1a237e"/>
+    </svg>
+  </div>
+
+  <!-- PRINTABLES -->
+  <section id="printables" class="section">
+    <div class="section-inner">
+      <h2 class="section-title reveal">Free Printables</h2>
+      <p class="section-sub reveal reveal-delay-1">Print at home and bring the adventure into the real world</p>
+
+      <div class="print-grid">
+        <a href="printables/coloring-pip.html" class="print-card reveal reveal-delay-1" target="_blank">
+          <span class="print-icon">🧒</span>
+          <span>Pip Colouring Page</span>
+          <p>Colour in your favourite explorer</p>
+        </a>
+        <a href="printables/coloring-shell.html" class="print-card reveal reveal-delay-2" target="_blank">
+          <span class="print-icon">🐢</span>
+          <span>Shell Colouring Page</span>
+          <p>Don't forget Pip's loyal tortoise!</p>
+        </a>
+        <a href="printables/bread-sort-worksheet.html" class="print-card reveal reveal-delay-3" target="_blank">
+          <span class="print-icon">🍞</span>
+          <span>Bread Sort Worksheet</span>
+          <p>Practice sorting offline with Benny</p>
+        </a>
+        <a href="printables/badges-print.html" class="print-card reveal reveal-delay-4" target="_blank">
+          <span class="print-icon">🏆</span>
+          <span>Badges to Cut Out</span>
+          <p>Print your earned badges and keep them!</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
   <footer>
-    <p>Made with ♥ for curious minds | <a href="game/" style="color:#FFD700;">Play Now</a></p>
+    <span class="footer-logo">🗺️ Adventopia</span>
+    <p>Made with ♥ for curious minds of all abilities</p>
+    <p style="margin-top:10px">
+      <a href="game/index.html">▶ Play Now</a>
+      &nbsp;·&nbsp;
+      <a href="#printables">Printables</a>
+      &nbsp;·&nbsp;
+      <a href="#characters">Characters</a>
+    </p>
   </footer>
+
+  <script>
+    /* ── FLOATING STARS ── */
+    const starsEl = document.getElementById('stars');
+    for (let i = 0; i < 55; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 4 + 2;
+      s.style.cssText = `
+        width:${size}px; height:${size}px;
+        top:${Math.random()*100}%;
+        left:${Math.random()*100}%;
+        --dur:${(Math.random()*3+2).toFixed(1)}s;
+        --delay:-${(Math.random()*4).toFixed(1)}s;
+      `;
+      starsEl.appendChild(s);
+    }
+
+    /* ── SCROLL REVEAL ── */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
 
 </body>
 </html>

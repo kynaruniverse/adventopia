@@ -35,26 +35,26 @@
     <p>Loading your adventure...</p>
   </div>
   
+  <!-- MENU BUTTON — floating top right, outside game container -->
+  <button id="menu-btn" title="Menu" aria-label="Open menu" style="display:none">
+    <span id="menu-icon">☰</span>
+  </button>
+
+  <!-- SLIDE-DOWN MENU -->
+  <div id="game-menu" class="hidden">
+    <button id="hint-btn"       class="menu-item">💡 Hint</button>
+    <button id="audio-btn"      class="menu-item">🔊 Audio</button>
+    <button id="fullscreen-btn" class="menu-item" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+    <button id="install-btn"    class="menu-item" style="display:none">📱 Install</button>
+    <button id="reset-btn"      class="menu-item danger" onclick="if(confirm('Reset all progress and start fresh?')){localStorage.removeItem('adventopia_save');location.reload();}">🔄 Reset</button>
+  </div>
+
   <!-- GAME CONTAINER -->
   <div id="game-container" class="hidden">
     
-    <!-- HUD — inventory bar only, no top button bar -->
+    <!-- HUD — inventory bar only -->
     <div id="hud">
       <div id="inventory-bar"></div>
-    </div>
-
-    <!-- MENU BUTTON — floating top right -->
-    <button id="menu-btn" title="Menu" aria-label="Open menu">
-      <span id="menu-icon">☰</span>
-    </button>
-
-    <!-- SLIDE-DOWN MENU -->
-    <div id="game-menu" class="hidden">
-      <button id="hint-btn"      class="menu-item">💡 Hint</button>
-      <button id="audio-btn"     class="menu-item">🔊 Audio</button>
-      <button id="fullscreen-btn" class="menu-item" onclick="toggleFullscreen()">⛶ Fullscreen</button>
-      <button id="install-btn"   class="menu-item" style="display:none">📱 Install</button>
-      <button id="reset-btn"     class="menu-item danger" onclick="if(confirm('Reset all progress and start fresh?')){localStorage.removeItem('adventopia_save');location.reload();}">🔄 Reset</button>
     </div>
     
     <!-- SCENE AREA — where backgrounds and objects appear -->
@@ -100,35 +100,7 @@
   
   <!-- Service Worker Registration & Orientation Lock -->
   <script>
-    // -----------------------------------------------
-    // ORIENTATION DETECTION & LOCKING
-    // Detects portrait mode and shows warning
-    // Attempts to lock to landscape on supported devices
-    // -----------------------------------------------
-    
-    function checkOrientation() {
-      const warning = document.getElementById("orientation-warning");
-      const isPortrait = window.innerHeight > window.innerWidth;
-      
-      if (isPortrait) {
-        warning.classList.add("show");
-      } else {
-        warning.classList.remove("show");
-      }
-    }
-    
-    // Check orientation on load and resize
-    window.addEventListener("load", checkOrientation);
-    window.addEventListener("resize", checkOrientation);
-    window.addEventListener("orientationchange", checkOrientation);
-    
-    // Attempt to lock orientation to landscape using Screen Orientation API
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock("landscape").catch(err => {
-        console.log("Orientation lock not supported or denied:", err);
-      });
-    }
-    
+
     // -----------------------------------------------
     // SERVICE WORKER REGISTRATION
     // Enables offline play and PWA installation
