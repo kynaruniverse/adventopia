@@ -4,23 +4,25 @@
    ============================================= */
 
 
-const CACHE_NAME = 'adventopia-v7';
+const CACHE_NAME = 'adventopia-v8';
 
 const CORE_FILES = [
-  "/game/",
-  "/game/index.html",
-  "/game/style.css",
-  "/game/main.js",
-  "/game/scene-art.js",
-  "/game/puzzles.js",
-  "/game/manifest.json",
-  "/game/data/world1.json",
-  "/game/data/scene1_village_square.json",
-  "/game/data/scene2_library.json",
-  "/game/data/scene3_town_gate.json",
-  "/game/data/puzzle1_bread_sort.json",
-  "/game/data/puzzle2_story_pages.json",
-  "/game/data/puzzle3_gate_pattern.json"
+  "/adventopia/game/",
+  "/adventopia/game/index.html",
+  "/adventopia/game/style.css",
+  "/adventopia/game/main.js",
+  "/adventopia/game/scene-art.js",
+  "/adventopia/game/puzzles.js",
+  "/adventopia/game/manifest.json",
+  "/adventopia/game/data/world1.json",
+  "/adventopia/game/data/scene1_village_square.json",
+  "/adventopia/game/data/scene2_library.json",
+  "/adventopia/game/data/scene3_town_gate.json",
+  "/adventopia/game/data/puzzle1_bread_sort.json",
+  "/adventopia/game/data/puzzle2_story_pages.json",
+  "/adventopia/game/data/puzzle3_gate_pattern.json",
+  "/adventopia/game/assets/icons/icon-192.png",
+  "/adventopia/game/assets/icons/icon-512.png"
 ];
 
 
@@ -111,7 +113,7 @@ self.addEventListener('fetch', event => {
             // If both cache and network fail
             // show a friendly offline message for HTML requests
             if (event.request.destination === 'document') {
-              return caches.match('/game/index.html');
+              return caches.match('/adventopia/game/index.html');
             }
           });
       })

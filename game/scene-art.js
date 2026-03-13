@@ -1,42 +1,131 @@
 /* =============================================
    ADVENTOPIA — scene-art.js
    Handles rendering of backgrounds and objects
-   Now optimized for PNG art integration
+
+   IMAGE SCALING RULES:
+   - Backgrounds: cover (fill canvas, crop centre)
+   - Characters/objects: contain (fit in slot, no crop)
    ============================================= */
 
-// Image cache — images are loaded once and reused.
-// Prevents new Image() being created on every draw call.
+
+// -----------------------------------------------
+// IMAGE CACHE
+// Images are loaded once and reused every draw.
+// -----------------------------------------------
+
 const imageCache = {};
 
 function getImage(src, onLoad, onError) {
   if (imageCache[src]) return imageCache[src];
+  
   const img = new Image();
   imageCache[src] = img;
+  
   img.onload = () => { if (onLoad) onLoad(img); };
   img.onerror = () => {
     img._error = true;
     console.warn(`[Asset] Failed to load: ${src}`);
     if (onError) onError();
   };
+  
   img.src = src;
   return img;
 }
 
+
+// -----------------------------------------------
+// COVER DRAW
+// Fills the target area completely.
+// Maintains aspect ratio — crops from centre.
+// Used for scene backgrounds.
+// -----------------------------------------------
+
+function drawImageCover(ctx, img, x, y, w, h) {
+  const imgRatio = img.naturalWidth / img.naturalHeight;
+  const targetRatio = w / h;
+  
+  let srcX, srcY, srcW, srcH;
+  
+  if (imgRatio > targetRatio) {
+    // Image is wider than target — crop sides
+    srcH = img.naturalHeight;
+    srcW = srcH * targetRatio;
+    srcX = (img.naturalWidth - srcW) / 2;
+    srcY = 0;
+  } else {
+    // Image is taller than target — crop top/bottom
+    srcW = img.naturalWidth;
+    srcH = srcW / targetRatio;
+    srcX = 0;
+    srcY = (img.naturalHeight - srcH) / 2;
+  }
+  
+  ctx.drawImage(img, srcX, srcY, srcW, srcH, x, y, w, h);
+}
+
+
+// -----------------------------------------------
+// CONTAIN DRAW
+// Fits the image inside the target area.
+// Maintains aspect ratio — never crops.
+// Centres the image in the slot.
+// Used for characters and objects.
+// -----------------------------------------------
+
+function drawImageContain(ctx, img, x, y, w, h) {
+  const imgRatio = img.naturalWidth / img.naturalHeight;
+  const targetRatio = w / h;
+  
+  let drawW, drawH, drawX, drawY;
+  
+  if (imgRatio > targetRatio) {
+    // Image is wider — fit to width
+    drawW = w;
+    drawH = w / imgRatio;
+    drawX = x;
+    drawY = y + (h - drawH) / 2;
+  } else {
+    // Image is taller — fit to height
+    drawH = h;
+    drawW = h * imgRatio;
+    drawX = x + (w - drawW) / 2;
+    drawY = y;
+  }
+  
+  ctx.drawImage(img, drawX, drawY, drawW, drawH);
+}
+
+
+// -----------------------------------------------
+// SCENE BACKGROUND
+// -----------------------------------------------
+
 function drawSceneArt(ctx, sceneData, width, height) {
   ctx.clearRect(0, 0, width, height);
-
+  
   if (sceneData.backgroundImage) {
     const src = `assets/backgrounds/${sceneData.backgroundImage}`;
+    
     const img = getImage(
       src,
-      () => { if (gameState.currentScene === sceneData.id) renderSceneObjects(sceneData, -1, -1); },
-      () => { if (gameState.currentScene === sceneData.id) renderSceneObjects(sceneData, -1, -1); }
+      () => {
+        if (gameState.currentScene === sceneData.id) {
+          renderSceneObjects(sceneData, -1, -1);
+        }
+      },
+      () => {
+        if (gameState.currentScene === sceneData.id) {
+          renderSceneObjects(sceneData, -1, -1);
+        }
+      }
     );
+    
     if (img.complete && !img._error) {
-      ctx.drawImage(img, 0, 0, width, height);
+      drawImageCover(ctx, img, 0, 0, width, height);
     } else {
       drawBackgroundPlaceholder(ctx, sceneData, width, height);
     }
+    
   } else {
     drawBackgroundPlaceholder(ctx, sceneData, width, height);
   }
@@ -45,56 +134,99 @@ function drawSceneArt(ctx, sceneData, width, height) {
 function drawBackgroundPlaceholder(ctx, sceneData, width, height) {
   ctx.fillStyle = sceneData.backgroundColor || '#87CEEB';
   ctx.fillRect(0, 0, width, height);
-
-  // Add placeholder text
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
   ctx.font = '24px Arial';
   ctx.textAlign = 'center';
-  ctx.fillText(`[PLACEHOLDER: ${sceneData.name} Background]`, width / 2, height / 2);
-  ctx.font = '16px Arial';
-  ctx.fillText(`(Add assets/backgrounds/${sceneData.id}.png)`, width / 2, height / 2 + 40);
+  ctx.fillText(`[${sceneData.name} Background]`, width / 2, height / 2);
+  ctx.font = '14px Arial';
+  ctx.fillText(
+    `Add: assets/backgrounds/${sceneData.id}.png`,
+    width / 2, height / 2 + 36
+  );
 }
 
-/**
- * Draws an interactive object or character.
- * Uses PNG assets if defined, otherwise falls back to placeholders.
- */
+
+// -----------------------------------------------
+// OBJECT / CHARACTER DRAWING
+// -----------------------------------------------
+
 function drawObjectArt(ctx, obj, canvasWidth, canvasHeight, isHovered = false) {
   const x = (obj.x / 100) * canvasWidth;
   const y = (obj.y / 100) * canvasHeight;
   const w = (obj.w / 100) * canvasWidth;
   const h = (obj.h / 100) * canvasHeight;
+  
   ctx.save();
-  // 1. Apply Hover Effects
+  
   if (isHovered) {
-    ctx.shadowColor = '#ffffff';
-    ctx.shadowBlur = 20;
-    // Slight lift effect
-    ctx.translate(0, -5);
+    ctx.shadowColor = '#FFD700';
+    ctx.shadowBlur = 24;
+    ctx.translate(0, -6);
   }
-  // 2. Draw the Image or Placeholder
+  
   if (obj.image) {
     const src = `assets/${obj.imageType || 'objects'}/${obj.image}`;
+    
     const img = getImage(
       src,
-      () => { if (activeSceneData) renderSceneObjects(activeSceneData, -1, -1); },
-      () => { obj._imageError = true; if (activeSceneData) renderSceneObjects(activeSceneData, -1, -1); }
+      () => {
+        if (activeSceneData) renderSceneObjects(activeSceneData, -1, -1);
+      },
+      () => {
+        obj._imageError = true;
+        if (activeSceneData) renderSceneObjects(activeSceneData, -1, -1);
+      }
     );
+    
     if (img.complete && !img._error && !obj._imageError) {
-      ctx.drawImage(img, x, y, w, h);
+      drawImageContain(ctx, img, x, y, w, h);
+      
+      // Gold hover ring drawn around the contain bounds
+      if (isHovered) {
+        const imgRatio = img.naturalWidth / img.naturalHeight;
+        const targetRatio = w / h;
+        let drawW, drawH, drawX, drawY;
+        if (imgRatio > targetRatio) {
+          drawW = w;
+          drawH = w / imgRatio;
+          drawX = x;
+          drawY = y + (h - drawH) / 2;
+        } else {
+          drawH = h;
+          drawW = h * imgRatio;
+          drawX = x + (w - drawW) / 2;
+          drawY = y;
+        }
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,215,0,0.6)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect ?
+          ctx.roundRect(drawX - 4, drawY - 4, drawW + 8, drawH + 8, 8) :
+          ctx.rect(drawX - 4, drawY - 4, drawW + 8, drawH + 8);
+        ctx.stroke();
+      }
+      
     } else {
       drawPlaceholderBox(ctx, obj, x, y, w, h, isHovered);
     }
+    
   } else {
     drawPlaceholderBox(ctx, obj, x, y, w, h, isHovered);
   }
+  
   ctx.restore();
 }
 
+
+// -----------------------------------------------
+// PLACEHOLDER BOX
+// Shown when an image is missing or still loading
+// -----------------------------------------------
+
 function drawPlaceholderBox(ctx, obj, x, y, w, h, isHovered) {
-  // Draw a rounded rectangle
   ctx.fillStyle = obj.color || '#FFD700';
-  ctx.strokeStyle = isHovered ? '#ffffff' : 'rgba(0,0,0,0.2)';
+  ctx.strokeStyle = isHovered ? '#FFD700' : 'rgba(0,0,0,0.2)';
   ctx.lineWidth = isHovered ? 4 : 2;
   
   ctx.beginPath();
@@ -105,16 +237,10 @@ function drawPlaceholderBox(ctx, obj, x, y, w, h, isHovered) {
   }
   ctx.fill();
   ctx.stroke();
-
-  // Label
+  
   ctx.fillStyle = '#333';
   ctx.font = `bold ${Math.max(12, w / 6)}px Arial`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(obj.label, x + w / 2, y + h / 2);
-  
-  // Sub-label for asset path
-  ctx.font = `${Math.max(8, w / 10)}px Arial`;
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
-  ctx.fillText(`PH: ${obj.id}.png`, x + w / 2, y + h / 2 + (h/4));
 }
