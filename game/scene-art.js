@@ -16,12 +16,21 @@
 const imageCache = {};
 
 function getImage(src, onLoad, onError) {
-  if (imageCache[src]) return imageCache[src];
+  if (imageCache[src]) {
+    const cached = imageCache[src];
+    // Already finished loading — fire callback immediately
+    if (cached.complete && !cached._error && onLoad) onLoad(cached);
+    // Already errored — fire error callback immediately
+    if (cached._error && onError) onError();
+    // Still loading — callback will never fire, but
+    // the next draw tick will catch it via img.complete
+    return cached;
+  }
   
   const img = new Image();
   imageCache[src] = img;
   
-  img.onload = () => { if (onLoad) onLoad(img); };
+  img.onload  = () => { if (onLoad)  onLoad(img); };
   img.onerror = () => {
     img._error = true;
     console.warn(`[Asset] Failed to load: ${src}`);
@@ -102,19 +111,24 @@ function drawImageContain(ctx, img, x, y, w, h) {
 
 function drawSceneArt(ctx, sceneData, width, height) {
   ctx.clearRect(0, 0, width, height);
-  
+
+  if (!sceneData.id) {
+    console.warn('[Scene] sceneData is missing an id field — redraws may not fire');
+  }
+
   if (sceneData.backgroundImage) {
-    const src = `assets/backgrounds/${sceneData.backgroundImage}`;
-    
+    const src       = `assets/backgrounds/${sceneData.backgroundImage}`;
+    const sceneId   = sceneData.id;
+
     const img = getImage(
       src,
       () => {
-        if (gameState.currentScene === sceneData.id) {
+        if (gameState.currentScene === sceneId) {
           renderSceneObjects(sceneData, -1, -1);
         }
       },
       () => {
-        if (gameState.currentScene === sceneData.id) {
+        if (gameState.currentScene === sceneId) {
           renderSceneObjects(sceneData, -1, -1);
         }
       }
@@ -132,17 +146,20 @@ function drawSceneArt(ctx, sceneData, width, height) {
 }
 
 function drawBackgroundPlaceholder(ctx, sceneData, width, height) {
+  ctx.save();
   ctx.fillStyle = sceneData.backgroundColor || '#87CEEB';
   ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
-  ctx.font = '24px Arial';
-  ctx.textAlign = 'center';
+  ctx.fillStyle    = 'rgba(255,255,255,0.5)';
+  ctx.font         = '24px Arial';
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'alphabetic';
   ctx.fillText(`[${sceneData.name} Background]`, width / 2, height / 2);
   ctx.font = '14px Arial';
   ctx.fillText(
     `Add: assets/backgrounds/${sceneData.id}.png`,
     width / 2, height / 2 + 36
   );
+  ctx.restore();
 }
 
 
@@ -170,20 +187,26 @@ function drawObjectArt(ctx, obj, canvasWidth, canvasHeight, isHovered = false) {
     const img = getImage(
       src,
       () => {
-        if (activeSceneData) renderSceneObjects(activeSceneData, -1, -1);
+        if (typeof activeSceneData !== 'undefined' && activeSceneData) {
+          renderSceneObjects(activeSceneData, -1, -1);
+        }
       },
       () => {
         obj._imageError = true;
-        if (activeSceneData) renderSceneObjects(activeSceneData, -1, -1);
+        if (typeof activeSceneData !== 'undefined' && activeSceneData) {
+          renderSceneObjects(activeSceneData, -1, -1);
+        }
       }
     );
     
     if (img.complete && !img._error && !obj._imageError) {
       drawImageContain(ctx, img, x, y, w, h);
       
-      // Gold hover ring drawn around the contain bounds
+      // Gold hover ring drawn around the contain bounds.
+      // Coordinates use x/y directly — ctx.translate already
+      // shifted the canvas so these land in the right place.
       if (isHovered) {
-        const imgRatio = img.naturalWidth / img.naturalHeight;
+        const imgRatio    = img.naturalWidth / img.naturalHeight;
         const targetRatio = w / h;
         let drawW, drawH, drawX, drawY;
         if (imgRatio > targetRatio) {
@@ -197,13 +220,15 @@ function drawObjectArt(ctx, obj, canvasWidth, canvasHeight, isHovered = false) {
           drawX = x + (w - drawW) / 2;
           drawY = y;
         }
-        ctx.shadowBlur = 0;
-        ctx.strokeStyle = 'rgba(255,215,0,0.6)';
-        ctx.lineWidth = 3;
+        ctx.shadowBlur  = 0;
+        ctx.strokeStyle = 'rgba(255,215,0,0.8)';
+        ctx.lineWidth   = 3;
         ctx.beginPath();
-        ctx.roundRect ?
-          ctx.roundRect(drawX - 4, drawY - 4, drawW + 8, drawH + 8, 8) :
+        if (ctx.roundRect) {
+          ctx.roundRect(drawX - 4, drawY - 4, drawW + 8, drawH + 8, 8);
+        } else {
           ctx.rect(drawX - 4, drawY - 4, drawW + 8, drawH + 8);
+        }
         ctx.stroke();
       }
       
@@ -238,9 +263,9 @@ function drawPlaceholderBox(ctx, obj, x, y, w, h, isHovered) {
   ctx.fill();
   ctx.stroke();
   
-  ctx.fillStyle = '#333';
-  ctx.font = `bold ${Math.max(12, w / 6)}px Arial`;
-  ctx.textAlign = 'center';
+  ctx.fillStyle    = '#333';
+  ctx.font         = `bold ${Math.max(12, w / 6)}px Arial`;
+  ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(obj.label, x + w / 2, y + h / 2);
+  ctx.fillText(obj.label || obj.id || '?', x + w / 2, y + h / 2);
 }

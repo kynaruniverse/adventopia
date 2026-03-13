@@ -18,7 +18,8 @@ const gameState = {
   activePuzzle: null,
   audioEnabled: true,
   gameStarted: false,
-  navArrows: []
+  navArrows: [],
+  pendingWorldComplete: false
 };
 
 let pendingPuzzle = null;
@@ -397,7 +398,6 @@ function isSceneLocked(sceneId) {
     if (lock.type === 'keyPieces') return gameState.collectedKeyPieces.length < lock.required;
     if (lock.type === 'puzzle')    return !gameState.solvedPuzzles.includes(lock.id);
   }
-  if (sceneId === 'scene3_town_gate') return gameState.collectedKeyPieces.length < 3;
   return false;
 }
 
@@ -577,10 +577,7 @@ function showReward(reward) {
     updateInventoryDisplay();
     playSFX('sfx_key_collect');
     if (gameState.collectedKeyPieces.length === 3) {
-      elements.rewardClose.addEventListener('click', function onThirdKey() {
-        elements.rewardClose.removeEventListener('click', onThirdKey);
-        setTimeout(() => checkWorldComplete(), 200);
-      });
+      gameState.pendingWorldComplete = true;
     }
   }
   if (reward.badge && !gameState.achievements.includes(reward.badge)) {
@@ -589,7 +586,13 @@ function showReward(reward) {
   }
 }
 
-elements.rewardClose.addEventListener('click', () => hide(elements.rewardOverlay));
+elements.rewardClose.addEventListener('click', () => {
+  hide(elements.rewardOverlay);
+  if (gameState.pendingWorldComplete) {
+    gameState.pendingWorldComplete = false;
+    setTimeout(() => checkWorldComplete(), 200);
+  }
+});
 
 // -----------------------------------------------
 // 15. WORLD COMPLETION CHECK
@@ -612,9 +615,13 @@ const audioEngine = {
 function playSFX(name) {
   if (!audioEngine.enabled) return;
   try {
-    const audio = new Audio(`assets/audio/${name}.mp3`);
-    audio.volume = 0.7;
-    audio.play().catch(() => {});
+    if (!audioEngine.sfxPool[name]) {
+      audioEngine.sfxPool[name] = new Audio(`assets/audio/${name}.mp3`);
+      audioEngine.sfxPool[name].volume = 0.7;
+    }
+    const sfx = audioEngine.sfxPool[name];
+    sfx.currentTime = 0;
+    sfx.play().catch(() => {});
   } catch(e) {}
 }
 
@@ -665,13 +672,16 @@ const gameMenu = document.getElementById('game-menu');
 
 function openMenu() {
   show(gameMenu);
-  gameMenu.style.display = 'flex';
-  menuBtn.querySelector('#menu-icon').textContent = '✕';
+  menuBtn.setAttribute('aria-expanded', 'true');
+  const icon = document.getElementById('menu-icon');
+  if (icon) icon.textContent = '✕';
 }
 
 function closeMenu() {
   hide(gameMenu);
-  menuBtn.querySelector('#menu-icon').textContent = '☰';
+  menuBtn.setAttribute('aria-expanded', 'false');
+  const icon = document.getElementById('menu-icon');
+  if (icon) icon.textContent = '☰';
 }
 
 menuBtn.addEventListener('click', (e) => {
@@ -718,9 +728,9 @@ if (!localStorage.getItem(menuTutorialKey)) {
 function checkOrientation() {
   const isPortrait = window.innerHeight > window.innerWidth;
   if (isPortrait) {
-    show(elements.orientationWarning);
+    elements.orientationWarning.classList.add('show');
   } else {
-    hide(elements.orientationWarning);
+    elements.orientationWarning.classList.remove('show');
   }
 }
 

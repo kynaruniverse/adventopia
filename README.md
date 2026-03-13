@@ -62,7 +62,7 @@ The game now works **offline** and is **landscape-only** for the best visuals an
 ```
 adventopia/
 ├── index.html              # Landing page
-├── og_image.png            # Social share image
+├── og-image.png            # Social share image
 ├── favicon.ico             # Browser tab icon
 ├── README.md
 ├── game/

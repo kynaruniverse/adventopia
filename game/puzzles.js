@@ -197,7 +197,7 @@ function handleTouchStart(e) {
 
 function handleTouchMove(e) {
   e.preventDefault();
-  const clone = touchClone || pageTouchClone;
+  const clone = touchClone || pageTouchClone || null;
   if (!clone) return;
   const touch   = e.touches[0];
   const offsetX = clone._offsetX || 0;
@@ -349,7 +349,7 @@ function renderStoryPagesPuzzle(puzzleData) {
         </p>
         <div style="display:flex;
                     flex-direction:column; gap:8px;">
-          ${[1,2,3,4,5].map(num => `
+          ${puzzleData.pages.map((_, idx) => idx + 1).map(num => `
             <div class="page-slot"
                  id="slot-${num}"
                  data-slot="${num}"
@@ -834,16 +834,24 @@ function checkGatePattern(puzzleId, correctAnswer) {
   const chosenSymbol = selected.dataset.symbol;
 
   if (chosenSymbol === correctAnswer) {
-    // Mark pattern stage as solved
+    // Mark pattern stage as solved — save both forms so
+    // reload correctly restores the key piece stage
     if (!gameState.solvedPuzzles.includes(puzzleId + '_pattern')) {
       gameState.solvedPuzzles.push(puzzleId + '_pattern');
     }
+    if (!gameState.solvedPuzzles.includes(puzzleId)) {
+      gameState.solvedPuzzles.push(puzzleId);
+    }
+    saveProgress();
 
-    // Award key piece 3 if not already collected
+    // Award key piece 3 via showReward so sfx, inventory,
+    // and pendingWorldComplete all fire correctly
     if (!gameState.collectedKeyPieces.includes('key_piece_3')) {
-      gameState.collectedKeyPieces.push('key_piece_3');
-      saveProgress();
-      updateInventoryDisplay();
+      showReward({
+        text: 'You solved the gate pattern! Key piece 3 collected!',
+        badge: null,
+        keyPiece: 'key_piece_3'
+      });
     }
 
     // Show success then move to key piece stage
@@ -856,19 +864,8 @@ function checkGatePattern(puzzleId, correctAnswer) {
       slot.style.borderColor = '#4CAF50';
     }
 
-    setTimeout(() => {
-      // Switch to key piece stage
-      const patternStage  = document.getElementById('pattern-stage');
-      const keyPieceStage = document.getElementById('keypiece-stage');
-      if (patternStage)  patternStage.style.display  = 'none';
-      if (keyPieceStage) keyPieceStage.style.display = 'block';
-
-      // Update key piece count display
-      const countEl = keyPieceStage.querySelector('strong');
-      if (countEl) {
-        countEl.textContent = gameState.collectedKeyPieces.length;
-      }
-    }, 700);
+    // Key piece stage will show when player reopens the gate puzzle
+    // after dismissing the reward overlay — no setTimeout needed
 
   } else {
     // Wrong answer
@@ -890,15 +887,15 @@ function checkGatePattern(puzzleId, correctAnswer) {
 function completeWorld1() {
   const puzzleData = gameState.activePuzzle;
   if (!puzzleData) return;
-  hide(elements.puzzleOverlay);
-  elements.puzzleContainer.innerHTML = '';
 
-  // Mark puzzle as fully solved
+  // Mark puzzle as fully solved before closing
   if (!gameState.solvedPuzzles.includes(puzzleData.id)) {
     gameState.solvedPuzzles.push(puzzleData.id);
   }
-
   saveProgress();
+
+  // Use closePuzzle() to properly clear container and activePuzzle
+  closePuzzle();
 
   // Show the world complete reward
   showWorldCompleteScreen(puzzleData);
@@ -968,17 +965,22 @@ function showWorldCompleteScreen(puzzleData) {
       </p>
       <div style="display:flex; gap:12px;
                   justify-content:center; flex-wrap:wrap;">
-        ${gameState.achievements.map(badge => `
-          <div style="background:rgba(255,215,0,0.2);
-                      border:2px solid #FFD700;
-                      border-radius:10px;
-                      padding:8px 14px;
-                      font-size:0.85rem;
-                      font-weight:bold;
-                      color:#FFD700;">
-            ⭐ ${badge}
-          </div>
-        `).join('')}
+        ${gameState.achievements.map(badge => {
+          const filename = 'badge_' + badge.toLowerCase().replace(/ /g, '_') + '.png';
+          return `
+            <div style="display:flex; flex-direction:column;
+                        align-items:center; gap:6px;">
+              <img src="assets/badges/${filename}"
+                   alt="${badge} badge"
+                   style="width:72px; height:72px; object-fit:contain;"
+                   onerror="this.style.display='none'" />
+              <span style="font-size:0.75rem; color:#FFD700;
+                           font-weight:bold;">
+                ${badge}
+              </span>
+            </div>
+          `;
+        }).join('')}
       </div>
     </div>
 
@@ -1009,7 +1011,12 @@ function dismissWorldComplete() {
   const screen = document.getElementById('world-complete-screen');
   if (screen) screen.remove();
 
-  // Show coming soon message for World 2
+  // Re-render the current scene before showing dialogue
+  // so the canvas isn't stale underneath
+  if (activeSceneData) {
+    renderSceneObjects(activeSceneData, -1, -1);
+  }
+
   showDialogue(
     "World 2 is coming soon! " +
     "For now you can replay The Learning Village " +

@@ -26,8 +26,12 @@
 </head>
 <body>
   
-  <!-- ORIENTATION WARNING — disabled, game auto-rotates in portrait -->
-  <div id="orientation-warning" style="display:none!important"></div>
+  <!-- ORIENTATION WARNING — shown in portrait mode via .show class -->
+  <div id="orientation-warning">
+    <h2>📱 Please Rotate Your Device</h2>
+    <p>Adventopia is best played in landscape. Please rotate your device.</p>
+    <button onclick="this.parentElement.classList.remove('show')" style="margin-top:24px;padding:10px 28px;font-size:1rem;background:#FFD700;color:#1a237e;border:none;border-radius:24px;cursor:pointer;font-weight:bold;">I'll rotate later</button>
+  </div>
   
   <!-- LOADING SCREEN -->
   <div id="loading-screen">
@@ -36,17 +40,18 @@
   </div>
   
   <!-- MENU BUTTON — floating top right, outside game container -->
-  <button id="menu-btn" title="Menu" aria-label="Open menu" style="display:none">
+  <button id="menu-btn" title="Menu" aria-label="Open menu" aria-expanded="false" aria-controls="game-menu" style="display:none">
     <span id="menu-icon">☰</span>
   </button>
 
   <!-- SLIDE-DOWN MENU -->
-  <div id="game-menu" class="hidden">
-    <button id="hint-btn"       class="menu-item">💡 Hint</button>
-    <button id="audio-btn"      class="menu-item">🔊 Audio</button>
-    <button id="fullscreen-btn" class="menu-item" onclick="toggleFullscreen()">⛶ Fullscreen</button>
-    <button id="install-btn"    class="menu-item" style="display:none">📱 Install</button>
-    <button id="reset-btn"      class="menu-item danger" onclick="if(confirm('Reset all progress and start fresh?')){localStorage.removeItem('adventopia_save');location.reload();}">🔄 Reset</button>
+  <!-- hint-btn and audio-btn are referenced by id in main.js elements object -->
+  <div id="game-menu" class="hidden" role="menu">
+    <button id="hint-btn"       class="menu-item" role="menuitem">💡 Hint</button>
+    <button id="audio-btn"      class="menu-item" role="menuitem">🔊 Audio</button>
+    <button id="fullscreen-btn" class="menu-item" role="menuitem" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+    <button id="install-btn"    class="menu-item" role="menuitem" style="display:none">📱 Install</button>
+    <button id="reset-btn"      class="menu-item danger" role="menuitem" onclick="if(confirm('Reset all progress and start fresh?')){localStorage.removeItem('adventopia_save');location.reload();}">🔄 Reset</button>
   </div>
 
   <!-- GAME CONTAINER -->
@@ -111,10 +116,10 @@
         .then(registration => {
           console.log("[App] Service Worker registered successfully");
           
-          // Check for updates periodically
+          // Check for updates every 30 minutes
           setInterval(() => {
             registration.update();
-          }, 60000); // Check every minute
+          }, 1800000);
         })
         .catch(err => {
           console.warn("[App] Service Worker registration failed:", err);
@@ -129,13 +134,12 @@
 
   </script>
   
-  <!-- Scene Art Engine -->
-  <script src="scene-art.js"></script>
-  <!-- Puzzle Logic -->
-  <script src="puzzles.js"></script>
-  <!-- Main Game Script -->
-  <script src="main.js"></script>
-  <script>
+  <!-- Scene Art Engine — loads first, defines drawSceneArt/drawObjectArt -->
+  <script src="scene-art.js" defer></script>
+  <!-- Puzzle Logic — depends on main.js gameState -->
+  <script src="puzzles.js" defer></script>
+  <!-- Main Game Script — entry point, calls initGame() -->
+  <script src="main.js" defer></script>
     let deferredPrompt = null;
 
     window.addEventListener("beforeinstallprompt", (e) => {
@@ -143,7 +147,7 @@
       deferredPrompt = e;
       console.log("[App] Install prompt available");
       const btn = document.getElementById("install-btn");
-      if (btn) btn.style.display = "block";
+      if (btn) btn.style.display = "";
     });
 
     document.getElementById("install-btn")?.addEventListener("click", async () => {
