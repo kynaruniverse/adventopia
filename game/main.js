@@ -147,7 +147,7 @@ function resizeCanvas() {
     elements.canvas.height = h * dpr;
     elements.canvas.style.width  = w + 'px';
     elements.canvas.style.height = h + 'px';
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 }
 
@@ -737,6 +737,63 @@ function stopMusic() {
 }
 
 elements.audioBtn.addEventListener('click', () => {
+// -----------------------------------------------
+// MENU SYSTEM
+// -----------------------------------------------
+
+const menuBtn  = document.getElementById('menu-btn');
+const gameMenu = document.getElementById('game-menu');
+
+menuBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const isOpen = !gameMenu.classList.contains('hidden');
+  if (isOpen) {
+    hide(gameMenu);
+    menuBtn.querySelector('#menu-icon').textContent = '☰';
+  } else {
+    show(gameMenu);
+    menuBtn.querySelector('#menu-icon').textContent = '✕';
+  }
+});
+
+// Close menu when clicking anywhere outside it
+document.addEventListener('click', (e) => {
+  if (!gameMenu.classList.contains('hidden') &&
+      !gameMenu.contains(e.target) &&
+      e.target !== menuBtn) {
+    hide(gameMenu);
+    menuBtn.querySelector('#menu-icon').textContent = '☰';
+  }
+});
+
+// Close menu when any menu item is tapped
+document.querySelectorAll('.menu-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    hide(gameMenu);
+    menuBtn.querySelector('#menu-icon').textContent = '☰';
+  });
+});
+
+// Fullscreen toggle
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+
+// Pulse the menu button on first visit to teach players it exists
+const menuTutorialKey = 'adventopia_menu_seen';
+if (!localStorage.getItem(menuTutorialKey)) {
+  setTimeout(() => {
+    menuBtn.classList.add('pulse');
+    menuBtn.addEventListener('animationend', () => {
+      menuBtn.classList.remove('pulse');
+      localStorage.setItem(menuTutorialKey, '1');
+    }, { once: true });
+  }, 2000);
+}
   audioEngine.enabled = !audioEngine.enabled;
   gameState.audioEnabled = audioEngine.enabled;
   elements.audioBtn.textContent = audioEngine.enabled ? '🔊 Audio' : '🔇 Audio';

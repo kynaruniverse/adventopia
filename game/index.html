@@ -38,17 +38,23 @@
   <!-- GAME CONTAINER -->
   <div id="game-container" class="hidden">
     
-    <!-- HUD — top bar with inventory and buttons -->
+    <!-- HUD — inventory bar only, no top button bar -->
     <div id="hud">
       <div id="inventory-bar"></div>
-      <div id="hud-buttons">
-        <button id="hint-btn" title="Get a hint">💡 Hint</button>
-        <button id="audio-btn" title="Toggle audio">🔊 Audio</button>
-        <button id="reset-btn" title="Reset save data" onclick="if(confirm('Reset all progress and start fresh?')){localStorage.removeItem('adventopia_save');location.reload();}">🔄 Reset</button>
-        <button id="install-btn" style="display:none; background:#4CAF50; color:white; border:none; border-radius:8px; padding:8px 16px; font-size:0.9rem; cursor:pointer;">
-          📱 Install
-        </button>
-      </div>
+    </div>
+
+    <!-- MENU BUTTON — floating top right -->
+    <button id="menu-btn" title="Menu" aria-label="Open menu">
+      <span id="menu-icon">☰</span>
+    </button>
+
+    <!-- SLIDE-DOWN MENU -->
+    <div id="game-menu" class="hidden">
+      <button id="hint-btn"      class="menu-item">💡 Hint</button>
+      <button id="audio-btn"     class="menu-item">🔊 Audio</button>
+      <button id="fullscreen-btn" class="menu-item" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+      <button id="install-btn"   class="menu-item" style="display:none">📱 Install</button>
+      <button id="reset-btn"     class="menu-item danger" onclick="if(confirm('Reset all progress and start fresh?')){localStorage.removeItem('adventopia_save');location.reload();}">🔄 Reset</button>
     </div>
     
     <!-- SCENE AREA — where backgrounds and objects appear -->
@@ -165,7 +171,7 @@
       deferredPrompt = e;
       console.log("[App] Install prompt available");
       const btn = document.getElementById("install-btn");
-      if (btn) btn.style.display = "inline-block";
+      if (btn) btn.style.display = "block";
     });
 
     document.getElementById("install-btn")?.addEventListener("click", async () => {
