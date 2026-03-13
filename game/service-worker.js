@@ -4,7 +4,7 @@
    ============================================= */
 
 
-const CACHE_NAME = 'adventopia-v8';
+const CACHE_NAME = 'adventopia-v9';
 
 const CORE_FILES = [
   "/adventopia/game/",
