@@ -701,6 +701,27 @@ html, body {
 }
 
 /* -----------------------------------------------
+   PORTRAIT MODE — ROTATE TO LANDSCAPE
+   Rotates the entire game 90 degrees when the
+   device is held in portrait. Keeps the game
+   always displaying as landscape without any
+   layout redesign.
+   ----------------------------------------------- */
+
+@media (orientation: portrait) {
+  body {
+    width: 100vh;
+    height: 100vw;
+    transform: rotate(90deg);
+    transform-origin: left top;
+    position: fixed;
+    top: 0;
+    left: 100%;
+    overflow: hidden;
+  }
+}
+
+/* -----------------------------------------------
    REDUCED MOTION
    Respects device accessibility settings
    Disables animations for motion-sensitive users

@@ -140,8 +140,14 @@ function clearProgress() {
 function resizeCanvas() {
   const sceneArea = document.getElementById('scene-area');
   if (sceneArea && elements.canvas) {
-    elements.canvas.width  = sceneArea.offsetWidth;
-    elements.canvas.height = sceneArea.offsetHeight;
+    const dpr = window.devicePixelRatio || 1;
+    const w   = sceneArea.offsetWidth;
+    const h   = sceneArea.offsetHeight;
+    elements.canvas.width  = w * dpr;
+    elements.canvas.height = h * dpr;
+    elements.canvas.style.width  = w + 'px';
+    elements.canvas.style.height = h + 'px';
+    ctx.scale(dpr, dpr);
   }
 }
 

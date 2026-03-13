@@ -26,15 +26,8 @@
 </head>
 <body>
   
-  <!-- ORIENTATION WARNING
-       Shows if user is in portrait mode on mobile/tablet -->
-  <div id="orientation-warning">
-    <h2>📱 Please Rotate Your Device</h2>
-    <p>Adventopia is best played in landscape mode for the full experience. Please rotate your device to landscape.</p>
-    <button onclick="this.parentElement.classList.remove('show')" style="margin-top:30px; padding:12px 30px; font-size:1.1rem; background:#FFD700; color:#1e3a8a; border:none; border-radius:30px; cursor:pointer; font-weight:bold;">
-      I'll rotate later
-    </button>
-  </div>
+  <!-- ORIENTATION WARNING — disabled, game auto-rotates in portrait -->
+  <div id="orientation-warning" style="display:none!important"></div>
   
   <!-- LOADING SCREEN -->
   <div id="loading-screen">
